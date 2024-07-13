@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/courseListFragment">
+
+    <fragment
+        android:id="@+id/courseListFragment"
+        android:name="com.example.teacherapp.ui.course.CourseListFragment"
+        android:label="Courses"
+        tools:layout="@layout/fragment_course_list">
+        <action
+            android:id="@+id/action_courseListFragment_to_attendanceFragment"
+            app:destination="@id/attendanceFragment" />
+        <action
+            android:id="@+id/action_courseListFragment_to_assignmentListFragment"
+            app:destination="@id/assignmentListFragment" />
+        <action
+            android:id="@+id/action_courseListFragment_to_studentListFragment"
+            app:destination="@id/studentListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/attendanceFragment"
+        android:name="com.example.teacherapp.ui.attendance.AttendanceFragment"
+        android:label="Attendance"
+        tools:layout="@layout/fragment_attendance">
+        <argument
+            android:name="COURSE_ID"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/assignmentListFragment"
+        android:name="com.example.teacherapp.ui.assignment.AssignmentListFragment"
+        android:label="Assignments"
+        tools:layout="@layout/fragment_assignment_list">
+        <argument
+            android:name="COURSE_ID"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/studentListFragment"
+        android:name="com.example.teacherapp.ui.student.StudentListFragment"
+        android:label="Students"
+        tools:layout="@layout/fragment_student_list">
+        <argument
+            android:name="COURSE_ID"
+            app:argType="integer" />
+    </fragment>
+</navigation>

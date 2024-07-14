@@ -10,6 +10,8 @@ interface AssignmentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(assignment: Assignment)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(assignments: List<Assignment>)
 
     @Update
     suspend fun update(assignment: Assignment)

@@ -18,9 +18,11 @@ class AttendanceViewModel(private val repository: AttendanceRepository) : ViewMo
         }
     }
 
-    fun saveAttendance(attendance: Attendance) {
+    fun saveAttendances(attendances: List<Attendance>) {
         viewModelScope.launch {
-            repository.insert(attendance)
+            attendances.forEach { attendance ->
+                repository.insert(attendance)
+            }
         }
     }
 

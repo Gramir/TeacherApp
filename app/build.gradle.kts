@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("kapt")
 }
 
 android {
@@ -68,6 +69,11 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation (libs.androidx.room.runtime)
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation (libs.androidx.room.ktx)
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.7.7")
 
     android {
         namespace = "com.example.teacherapp"
@@ -105,6 +111,7 @@ dependencies {
         buildFeatures {
             compose = true
             viewBinding = true
+            //noinspection DataBindingWithoutKapt
             dataBinding = true
         }
         composeOptions {

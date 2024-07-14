@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.teacherapp.data.database.AppDatabase
+import com.example.teacherapp.data.model.Assignment
 import com.example.teacherapp.data.repository.AssignmentRepository
 import com.example.teacherapp.databinding.FragmentAssignmentListBinding
 import com.example.teacherapp.viewmodel.AssignmentViewModel

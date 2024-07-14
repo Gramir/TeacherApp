@@ -1,5 +1,6 @@
 package com.example.teacherapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,7 +15,9 @@ class LoginViewModel(private val repository: TeacherRepository) : ViewModel() {
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            _loginResult.value = repository.login(username, password)
+            val teacher = repository.login(username, password)
+            Log.d("LoginViewModel", "Login attempt: username=$username, password=$password, result=$teacher")
+            _loginResult.value = teacher
         }
     }
 }

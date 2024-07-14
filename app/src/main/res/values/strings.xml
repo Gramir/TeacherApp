@@ -1,3 +1,59 @@
 <resources>
     <string name="app_name">TeacherApp</string>
+
+    <!-- Login -->
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="login_failed">Invalid username or password</string>
+
+    <!-- Course List -->
+    <string name="courses">Courses</string>
+    <string name="attendance">Attendance</string>
+    <string name="assignments">Assignments</string>
+    <string name="students">Students</string>
+
+    <!-- Attendance -->
+    <string name="date">Date</string>
+    <string name="save_attendance">Save Attendance</string>
+    <string name="attendance_saved">Attendance saved successfully</string>
+
+    <!-- Assignments -->
+    <string name="add_assignment">Add Assignment</string>
+    <string name="edit_assignment">Edit Assignment</string>
+    <string name="assignment_title">Title</string>
+    <string name="assignment_description">Description</string>
+    <string name="due_date">Due Date</string>
+    <string name="assignment_status">Status</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="assignment_saved">Assignment saved successfully</string>
+    <string name="assignment_deleted">Assignment deleted successfully</string>
+
+    <!-- Student List -->
+    <string name="student_name">Name</string>
+    <string name="student_email">Email</string>
+    <string name="student_phone">Phone</string>
+    <string name="student_birth_date">Birth Date</string>
+
+    <!-- Status options for assignments -->
+    <string-array name="assignment_status_options">
+        <item>Pending</item>
+        <item>Submitted</item>
+        <item>Graded</item>
+    </string-array>
+
+    <!-- Error messages -->
+    <string name="error_field_required">This field is required</string>
+    <string name="error_invalid_date">Invalid date format</string>
+
+    <!-- Navigation -->
+    <string name="back">Back</string>
+
+    <!-- Miscellaneous -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="confirm_delete">Are you sure you want to delete this?</string>
 </resources>

@@ -10,7 +10,12 @@ interface AttendanceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(attendance: Attendance)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(attendances: List<Attendance>)
 
     @Query("DELETE FROM attendances WHERE courseId = :courseId AND date = :date")
     suspend fun deleteAttendanceForCourseAndDate(courseId: Int, date: String)
+
+    @Update
+    suspend fun update(attendance: Attendance)
 }

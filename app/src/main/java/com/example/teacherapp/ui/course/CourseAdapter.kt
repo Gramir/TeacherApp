@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.teacherapp.data.model.Course
 import com.example.teacherapp.databinding.ItemCourseBinding
 
-class CourseAdapter : ListAdapter<Course, CourseAdapter.CourseViewHolder>(CourseDiffCallback()) {
+class CourseAdapter : ListAdapter<Course, CourseAdapter.CourseViewHolder>(CourseViewHolder.CourseDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
         val binding = ItemCourseBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -40,4 +40,5 @@ class CourseAdapter : ListAdapter<Course, CourseAdapter.CourseViewHolder>(Course
             return oldItem == newItem
         }
     }
+}
 }

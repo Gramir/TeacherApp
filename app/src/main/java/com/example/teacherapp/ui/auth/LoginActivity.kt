@@ -2,6 +2,7 @@ package com.example.teacherapp.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.teacherapp.data.database.AppDatabase
@@ -24,7 +25,7 @@ class LoginActivity : AppCompatActivity() {
         val database = AppDatabase.getDatabase(applicationContext)
         val repository = TeacherRepository(database.teacherDao())
         val factory = LoginViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory).get(LoginViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
 
         binding.loginButton.setOnClickListener {
             val username = binding.usernameEditText.text.toString()
@@ -34,6 +35,7 @@ class LoginActivity : AppCompatActivity() {
 
         viewModel.loginResult.observe(this) { teacher ->
             if (teacher != null) {
+                Log.d("LoginActivity", "Login successful: $teacher")
                 val intent = Intent(this, MainActivity::class.java)
                 intent.putExtra("TEACHER_ID", teacher.id)
                 startActivity(intent)

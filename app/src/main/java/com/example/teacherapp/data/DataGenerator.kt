@@ -4,7 +4,7 @@ import com.example.teacherapp.data.model.*
 
 object DataGenerator {
     fun generateTestData(): TestData {
-        val teacher = Teacher(1, "teacher1", "password", "John Doe", "john.doe@example.com")
+        val teacher = Teacher(1, "teacher1", "123456", "John Doe", "john.doe@example.com")
 
         val courses = listOf(
             Course(1, "Mathematics", 1),
@@ -28,12 +28,12 @@ object DataGenerator {
         )
 
         val attendances = listOf(
-            Attendance(1, 1, "2023-05-10", true),
-            Attendance(2, 1, "2023-05-10", false),
-            Attendance(3, 1, "2023-05-10", true),
-            Attendance(4, 2, "2023-05-11", true),
-            Attendance(5, 2, "2023-05-11", true),
-            Attendance(6, 3, "2023-05-12", false)
+            Attendance(1, 1, "2023-05-10", true, "Alice Johnson"),
+            Attendance(2, 1, "2023-05-10", false, "Bob Smith"),
+            Attendance(3, 1, "2023-05-10", true, "Charlie Brown"),
+            Attendance(4, 2, "2023-05-11", true, "David Wilson"),
+            Attendance(5, 2, "2023-05-11", true, "Eva Taylor"),
+            Attendance(6, 3, "2023-05-12", false, "Frank Anderson")
         )
 
         return TestData(teacher, courses, students, assignments, attendances)

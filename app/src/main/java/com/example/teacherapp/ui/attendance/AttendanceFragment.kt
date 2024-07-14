@@ -8,8 +8,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.teacherapp.data.database.AppDatabase
+import com.example.teacherapp.data.model.Attendance
 import com.example.teacherapp.data.repository.AttendanceRepository
 import com.example.teacherapp.databinding.FragmentAttendanceBinding
+import com.example.teacherapp.ui.util.DatePickerFragment
 import com.example.teacherapp.viewmodel.AttendanceViewModel
 import com.example.teacherapp.viewmodel.AttendanceViewModelFactory
 import java.text.SimpleDateFormat
@@ -74,7 +76,16 @@ class AttendanceFragment : Fragment() {
 
     private fun saveAttendance(courseId: Int) {
         val date = binding.dateEditText.text.toString()
-        viewModel.saveAttendance(adapter.currentList, courseId, date)
+        val attendances = adapter.currentList.map { attendanceWithStudent ->
+            Attendance(
+                studentId = attendanceWithStudent.studentId,
+                courseId = courseId,
+                date = date,
+                present = attendanceWithStudent.present,
+                studentName = attendanceWithStudent.studentName
+            )
+        }
+        viewModel.saveAttendances(attendances)
     }
 
     override fun onDestroyView() {

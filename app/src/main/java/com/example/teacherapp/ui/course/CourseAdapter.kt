@@ -8,26 +8,29 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.teacherapp.data.model.Course
 import com.example.teacherapp.databinding.ItemCourseBinding
 
-class CourseAdapter : ListAdapter<Course, CourseAdapter.CourseViewHolder>(CourseViewHolder.CourseDiffCallback()) {
+class CourseAdapter(private val listener: CourseClickListener) : ListAdapter<Course, CourseAdapter.CourseViewHolder>(CourseDiffCallback()) {
+
+    interface CourseClickListener {
+        fun onAttendanceClick(courseId: Int)
+        fun onAssignmentsClick(courseId: Int)
+        fun onStudentsClick(courseId: Int)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
         val binding = ItemCourseBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return CourseViewHolder(binding)
+        return CourseViewHolder(binding, listener)
     }
 
     override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class CourseViewHolder(private val binding: ItemCourseBinding) : RecyclerView.ViewHolder(binding.root) {
+    class CourseViewHolder(private val binding: ItemCourseBinding, private val listener: CourseClickListener) : RecyclerView.ViewHolder(binding.root) {
         fun bind(course: Course) {
             binding.courseNameTextView.text = course.name
-            // Set click listeners for buttons
-            binding.attendanceButton.setOnClickListener {
-                // Handle attendance button click
-            }
-            binding.assignmentsButton.setOnClickListener {
-                // Handle assignments button click
+            binding.attendanceButton.setOnClickListener { listener.onAttendanceClick(course.id) }
+            binding.assignmentsButton.setOnClickListener { listener.onAssignmentsClick(course.id) }
+            binding.studentsButton.setOnClickListener { listener.onStudentsClick(course.id) }
         }
     }
 
@@ -40,5 +43,4 @@ class CourseAdapter : ListAdapter<Course, CourseAdapter.CourseViewHolder>(Course
             return oldItem == newItem
         }
     }
-}
 }

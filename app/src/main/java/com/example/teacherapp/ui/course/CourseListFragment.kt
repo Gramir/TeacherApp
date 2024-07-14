@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.teacherapp.data.database.AppDatabase
 import com.example.teacherapp.data.repository.CourseRepository
@@ -13,7 +14,7 @@ import com.example.teacherapp.databinding.FragmentCourseListBinding
 import com.example.teacherapp.viewmodel.CourseViewModel
 import com.example.teacherapp.viewmodel.CourseViewModelFactory
 
-class CourseListFragment : Fragment() {
+class CourseListFragment : Fragment(), CourseAdapter.CourseClickListener {
 
     private var _binding: FragmentCourseListBinding? = null
     private val binding get() = _binding!!
@@ -31,10 +32,9 @@ class CourseListFragment : Fragment() {
 
         val database = AppDatabase.getDatabase(requireContext())
         val repository = CourseRepository(database.courseDao())
-        val factory = CourseViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory).get(CourseViewModel::class.java)
+        viewModel = ViewModelProvider(this, CourseViewModelFactory(repository))[CourseViewModel::class.java]
 
-        adapter = CourseAdapter()
+        adapter = CourseAdapter(this)
         binding.courseRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.courseRecyclerView.adapter = adapter
 
@@ -44,6 +44,18 @@ class CourseListFragment : Fragment() {
         viewModel.courses.observe(viewLifecycleOwner) { courses ->
             adapter.submitList(courses)
         }
+    }
+
+    override fun onAttendanceClick(courseId: Int) {
+        findNavController().navigate(CourseListFragmentDirections.actionCourseListFragmentToAttendanceFragment(courseId))
+    }
+
+    override fun onAssignmentsClick(courseId: Int) {
+        findNavController().navigate(CourseListFragmentDirections.actionCourseListFragmentToAssignmentListFragment(courseId))
+    }
+
+    override fun onStudentsClick(courseId: Int) {
+        findNavController().navigate(CourseListFragmentDirections.actionCourseListFragmentToStudentListFragment(courseId))
     }
 
     override fun onDestroyView() {

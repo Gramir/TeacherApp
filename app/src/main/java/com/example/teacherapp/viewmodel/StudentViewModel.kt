@@ -1,5 +1,6 @@
 package com.example.teacherapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,7 +15,9 @@ class StudentViewModel(private val repository: StudentRepository) : ViewModel() 
 
     fun getStudentsForCourse(courseId: Int) {
         viewModelScope.launch {
-            _students.value = repository.getStudentsForCourse(courseId)
+            val studentList = repository.getStudentsForCourse(courseId)
+            Log.d("StudentViewModel", "Retrieved ${studentList.size} students for course $courseId")
+            _students.value = studentList
         }
     }
 }

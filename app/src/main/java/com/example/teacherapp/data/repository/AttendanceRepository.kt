@@ -8,6 +8,10 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
         return attendanceDao.getAttendanceForCourseAndDate(courseId, date)
     }
 
+    suspend fun getAttendanceForCourse(courseId: Int): List<Attendance> {
+        return attendanceDao.getAttendanceForCourse(courseId)
+    }
+
     suspend fun insert(attendance: Attendance) {
         attendanceDao.insert(attendance)
     }

@@ -28,7 +28,8 @@
         tools:layout="@layout/fragment_attendance">
         <argument
             android:name="courseId"
-            app:argType="integer" />
+            app:argType="integer"
+            android:defaultValue="-1"/>
     </fragment>
 
     <fragment
@@ -38,7 +39,8 @@
         tools:layout="@layout/fragment_assignment_list">
         <argument
             android:name="courseId"
-            app:argType="integer" />
+            app:argType="integer"
+            android:defaultValue="-1" />
     </fragment>
 
     <fragment
@@ -48,6 +50,7 @@
         tools:layout="@layout/fragment_student_list">
         <argument
             android:name="courseId"
-            app:argType="integer" />
+            app:argType="integer"
+            android:defaultValue="-1"/>
     </fragment>
 </navigation>

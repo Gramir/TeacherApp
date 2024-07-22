@@ -1,6 +1,7 @@
 package com.example.teacherapp.ui.attendance
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,11 +35,12 @@ class AttendanceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val courseId = arguments?.getInt("COURSE_ID") ?: -1
+        Log.d("AttendanceFragment", "Received courseId: $courseId")
 
         val database = AppDatabase.getDatabase(requireContext())
         val repository = AttendanceRepository(database.attendanceDao())
         val factory = AttendanceViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory).get(AttendanceViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory)[AttendanceViewModel::class.java]
 
         adapter = AttendanceAdapter()
         binding.attendanceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -58,6 +60,7 @@ class AttendanceFragment : Fragment() {
         viewModel.getAttendanceForCourseAndDate(courseId, currentDate)
 
         viewModel.attendances.observe(viewLifecycleOwner) { attendances ->
+            Log.d("AttendanceFragment", "Received ${attendances.size} attendances for course $courseId")
             adapter.submitList(attendances)
         }
     }

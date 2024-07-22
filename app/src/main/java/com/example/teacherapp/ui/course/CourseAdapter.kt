@@ -1,5 +1,6 @@
 package com.example.teacherapp.ui.course
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -30,7 +31,9 @@ class CourseAdapter(private val listener: CourseClickListener) : ListAdapter<Cou
             binding.courseNameTextView.text = course.name
             binding.attendanceButton.setOnClickListener { listener.onAttendanceClick(course.id) }
             binding.assignmentsButton.setOnClickListener { listener.onAssignmentsClick(course.id) }
-            binding.studentsButton.setOnClickListener { listener.onStudentsClick(course.id) }
+            binding.studentsButton.setOnClickListener {
+                Log.d("CourseAdapter", "Students button clicked for course: ${course.id}")
+                listener.onStudentsClick(course.id) }
         }
     }
 

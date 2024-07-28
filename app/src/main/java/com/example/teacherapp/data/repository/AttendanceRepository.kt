@@ -1,22 +1,25 @@
 package com.example.teacherapp.data.repository
 
+import android.util.Log
 import com.example.teacherapp.data.dao.AttendanceDao
+import com.example.teacherapp.data.dao.AttendanceWithStudentName
 import com.example.teacherapp.data.model.Attendance
 
 class AttendanceRepository(private val attendanceDao: AttendanceDao) {
-    suspend fun getAttendanceForCourseAndDate(courseId: Int, date: String): List<Attendance> {
-        return attendanceDao.getAttendanceForCourseAndDate(courseId, date)
+
+    suspend fun getStudentsWithAttendanceForCourseAndDate(courseId: Int, date: String): List<AttendanceWithStudentName> {
+        Log.d("AttendanceRepository", "Fetching attendances for course $courseId on date $date")
+        val attendances = attendanceDao.getStudentsWithAttendanceForCourseAndDate(courseId, date)
+        Log.d("AttendanceRepository", "Retrieved ${attendances.size} attendances")
+        if (attendances.isEmpty()) {
+            Log.d("AttendanceRepository", "No attendances retrieved")
+        } else {
+            Log.d("AttendanceRepository", "First attendance: ${attendances[0]}")
+        }
+        return attendances
     }
 
-    suspend fun getAttendanceForCourse(courseId: Int): List<Attendance> {
-        return attendanceDao.getAttendanceForCourse(courseId)
-    }
-
-    suspend fun insert(attendance: Attendance) {
-        attendanceDao.insert(attendance)
-    }
-
-    suspend fun deleteAttendanceForCourseAndDate(courseId: Int, date: String) {
-        attendanceDao.deleteAttendanceForCourseAndDate(courseId, date)
+    suspend fun saveAttendance(attendance: Attendance) {
+        attendanceDao.insertOrUpdateAttendance(attendance)
     }
 }

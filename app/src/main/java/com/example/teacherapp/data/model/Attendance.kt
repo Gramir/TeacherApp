@@ -7,6 +7,5 @@ data class Attendance(
     val studentId: Int,
     val courseId: Int,
     val date: String,
-    var present: Boolean,
-    val studentName: String?
+    var present: Boolean
 )

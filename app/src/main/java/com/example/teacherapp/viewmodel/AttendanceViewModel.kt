@@ -5,38 +5,32 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.teacherapp.data.dao.AttendanceWithStudentName
 import com.example.teacherapp.data.model.Attendance
 import com.example.teacherapp.data.repository.AttendanceRepository
 import kotlinx.coroutines.launch
 
 class AttendanceViewModel(private val repository: AttendanceRepository) : ViewModel() {
-    private val _attendances = MutableLiveData<List<Attendance>>()
-    val attendances: LiveData<List<Attendance>> = _attendances
+    private val _attendances = MutableLiveData<List<AttendanceWithStudentName>>()
+    val attendances: LiveData<List<AttendanceWithStudentName>> = _attendances
 
-    fun getAttendanceForCourseAndDate(courseId: Int, date: String) {
+    fun getStudentsWithAttendanceForCourseAndDate(courseId: Int, date: String) {
         viewModelScope.launch {
-            _attendances.value = repository.getAttendanceForCourseAndDate(courseId, date)
-        }
-    }
-    fun getAttendanceForCourse(courseId: Int) {
-        viewModelScope.launch {
-            val attendanceList = repository.getAttendanceForCourse(courseId)
-            Log.d("AttendanceViewModel", "Retrieved ${attendanceList.size} attendances for course $courseId")
+            Log.d("AttendanceViewModel", "Fetching attendances for course $courseId on date $date")
+            val attendanceList = repository.getStudentsWithAttendanceForCourseAndDate(courseId, date)
+            Log.d("AttendanceViewModel", "Retrieved ${attendanceList.size} attendances")
+            if (attendanceList.isEmpty()) {
+                Log.d("AttendanceViewModel", "No attendances retrieved")
+            } else {
+                Log.d("AttendanceViewModel", "First attendance: ${attendanceList[0]}")
+            }
             _attendances.value = attendanceList
         }
     }
 
-    fun saveAttendances(attendances: List<Attendance>) {
+    fun saveAttendance(attendance: Attendance) {
         viewModelScope.launch {
-            attendances.forEach { attendance ->
-                repository.insert(attendance)
-            }
-        }
-    }
-
-    fun deleteAttendanceForCourseAndDate(courseId: Int, date: String) {
-        viewModelScope.launch {
-            repository.deleteAttendanceForCourseAndDate(courseId, date)
+            repository.saveAttendance(attendance)
         }
     }
 }

@@ -26,6 +26,8 @@ class AddEditAssignmentDialogFragment : DialogFragment() {
     private var courseId: Int = -1
     private var assignment: Assignment? = null
 
+    private var onAssignmentSavedListener: ((Assignment) -> Unit)? = null
+
     companion object {
         fun newInstance(courseId: Int, assignment: Assignment? = null): AddEditAssignmentDialogFragment {
             val fragment = AddEditAssignmentDialogFragment()
@@ -105,7 +107,6 @@ class AddEditAssignmentDialogFragment : DialogFragment() {
         val status = binding.statusSpinner.selectedItem.toString()
 
         if (title.isBlank() || description.isBlank() || dueDate.isBlank()) {
-            // Show error message
 
             return
         }
@@ -124,9 +125,14 @@ class AddEditAssignmentDialogFragment : DialogFragment() {
         } else {
             viewModel.updateAssignment(newAssignment)
         }
+        onAssignmentSavedListener?.invoke(newAssignment)
 
         dismiss()
     }
+    fun setOnAssignmentSavedListener(listener: (Assignment) -> Unit) {
+        onAssignmentSavedListener = listener
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

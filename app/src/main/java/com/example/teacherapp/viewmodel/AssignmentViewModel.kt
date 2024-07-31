@@ -20,7 +20,9 @@ class AssignmentViewModel(private val repository: AssignmentRepository) : ViewMo
 
     fun saveAssignment(assignment: Assignment) {
         viewModelScope.launch {
-            repository.insert(assignment)
+            val newId = repository.getNextId()
+            val newAssignment = assignment.copy(id = newId)
+            repository.insert(newAssignment)
             getAssignmentsForCourse(assignment.courseId)
         }
     }

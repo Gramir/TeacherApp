@@ -8,8 +8,8 @@ class AssignmentRepository(private val assignmentDao: AssignmentDao) {
         return assignmentDao.getAssignmentsForCourse(courseId)
     }
 
-    suspend fun insert(assignment: Assignment) {
-        assignmentDao.insert(assignment)
+    suspend fun insert(assignment: Assignment): Long {
+        return assignmentDao.insert(assignment)
     }
 
     suspend fun update(assignment: Assignment) {
@@ -18,5 +18,9 @@ class AssignmentRepository(private val assignmentDao: AssignmentDao) {
 
     suspend fun delete(assignment: Assignment) {
         assignmentDao.delete(assignment)
+    }
+
+    suspend fun getNextId(): Int {
+        return (assignmentDao.getMaxId() ?: 0) + 1
     }
 }

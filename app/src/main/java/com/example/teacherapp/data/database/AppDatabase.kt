@@ -36,7 +36,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "teacher_app_database"
                 )
-                    .addCallback(object : RoomDatabase.Callback() {
+                    .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
                             CoroutineScope(Dispatchers.IO).launch {
@@ -47,7 +47,6 @@ abstract class AppDatabase : RoomDatabase() {
                                 Log.d("AppDatabase", "Test teacher inserted: ${testData.teacher}")
                                 database.courseDao().insertAll(testData.courses)
                                 database.studentDao().insertAll(testData.students)
-                                database.assignmentDao().insertAll(testData.assignments)
                                 database.attendanceDao().insertAll(testData.attendances)
                             }
                         }

@@ -9,13 +9,14 @@ interface AssignmentDao {
     suspend fun getAssignmentsForCourse(courseId: Int): List<Assignment>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(assignment: Assignment)
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(assignments: List<Assignment>)
+    suspend fun insert(assignment: Assignment): Long
 
     @Update
     suspend fun update(assignment: Assignment)
 
     @Delete
     suspend fun delete(assignment: Assignment)
+
+    @Query("SELECT MAX(id) FROM assignments")
+    suspend fun getMaxId(): Int?
 }

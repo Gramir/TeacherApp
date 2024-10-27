@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     kotlin("kapt")
     id ("androidx.navigation.safeargs.kotlin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -75,6 +76,7 @@ dependencies {
     implementation (libs.androidx.room.ktx)
     implementation ("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation ("androidx.navigation:navigation-ui-ktx:2.7.7")
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
     android {
         namespace = "com.example.teacherapp"

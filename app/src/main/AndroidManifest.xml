@@ -16,7 +16,7 @@
 
         <!-- Actividad de inicio de sesión -->
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name=".presentation.activity.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.TeacherApp.NoActionBar">
             <intent-filter>
@@ -27,7 +27,7 @@
 
         <!-- Actividad principal -->
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".presentation.activity.MainActivity"
             android:exported="false"
             android:label="@string/app_name"
             android:theme="@style/Theme.TeacherApp.NoActionBar" />

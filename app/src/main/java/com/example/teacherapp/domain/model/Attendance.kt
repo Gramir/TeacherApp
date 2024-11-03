@@ -1,11 +1,9 @@
 package com.example.teacherapp.domain.model
 
-import androidx.room.Entity
-
-@Entity(tableName = "attendances", primaryKeys = ["studentId", "courseId", "date"])
 data class Attendance(
-    val studentId: Int,
-    val courseId: Int,
-    val date: String,
-    var present: Boolean
+    val id: String = "",
+    val studentId: String = "",
+    val courseId: String = "",
+    val date: String = "",
+    val present: Boolean = false
 )

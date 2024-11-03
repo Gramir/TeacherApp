@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "152245441014",
+    "project_id": "teacherapp-493b3",
+    "storage_bucket": "teacherapp-493b3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:152245441014:android:30cad7d57ac401cbb7b7d7",
+        "android_client_info": {
+          "package_name": "com.example.teacherApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5aiKJbBu-KLmzrRJVr0u_WAoAYRhS_1A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

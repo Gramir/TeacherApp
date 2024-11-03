@@ -1,13 +1,9 @@
 package com.example.teacherapp.domain.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "teachers")
 data class Teacher(
-    @PrimaryKey val id: Int,
-    val username: String,
-    val password: String,
-    val name: String,
-    val email: String
+    val id: String = "",
+    val username: String = "",
+    val name: String = "",
+    val email: String = ""
 )

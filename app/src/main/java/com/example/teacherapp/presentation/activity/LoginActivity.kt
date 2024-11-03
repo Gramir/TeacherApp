@@ -2,47 +2,75 @@ package com.example.teacherapp.presentation.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.example.teacherapp.data.datasource.local.database.AppDatabase
-import com.example.teacherapp.domain.repository.TeacherRepository
+import androidx.lifecycle.lifecycleScope
 import com.example.teacherapp.databinding.ActivityLoginBinding
-import com.example.teacherapp.presentation.viewmodel.login.LoginResult
+import com.example.teacherapp.presentation.viewmodel.login.LoginState
 import com.example.teacherapp.presentation.viewmodel.login.LoginViewModel
-import com.example.teacherapp.presentation.viewmodel.login.LoginViewModelFactory
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var viewModel: LoginViewModel
+    private val viewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val database = AppDatabase.getDatabase(applicationContext)
-        val repository = TeacherRepository(database.teacherDao())
-        viewModel = ViewModelProvider(this, LoginViewModelFactory(repository))[LoginViewModel::class.java]
+        setupViews()
+        observeState()
+    }
 
+    private fun setupViews() {
         binding.loginButton.setOnClickListener {
-            val username = binding.usernameEditText.text.toString()
-            val password = binding.passwordEditText.text.toString()
+            val username = binding.usernameInput.text.toString()
+            val password = binding.passwordInput.text.toString()
+
+            if (username.isBlank() || password.isBlank()) {
+                Snackbar.make(binding.root, "Please fill all fields", Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             viewModel.login(username, password)
         }
+    }
 
-        viewModel.loginResult.observe(this) { result ->
-            when (result) {
-                is LoginResult.Success -> {
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.putExtra("TEACHER_ID", result.teacher.id)
-                    startActivity(intent)
-                    finish()
-                }
-                is LoginResult.Error -> {
-                    Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show()
+    private fun observeState() {
+        lifecycleScope.launch {
+            viewModel.loginState.collect { state ->
+                when (state) {
+                    is LoginState.Initial -> {
+                        // Initial state, no action needed
+                    }
+                    is LoginState.Loading -> {
+                        binding.loginButton.isEnabled = false
+                        binding.progressBar.show()
+                    }
+                    is LoginState.Success -> {
+                        binding.progressBar.hide()
+                        navigateToMain(state.teacher.id)
+                    }
+                    is LoginState.Error -> {
+                        binding.loginButton.isEnabled = true
+                        binding.progressBar.hide()
+                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                    }
                 }
             }
         }
+    }
+
+    private fun navigateToMain(teacherId: String) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("TEACHER_ID", teacherId)
+        }
+        startActivity(intent)
+        finish()
     }
 }

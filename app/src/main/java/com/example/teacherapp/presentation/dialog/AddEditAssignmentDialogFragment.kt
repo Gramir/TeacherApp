@@ -6,43 +6,58 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.teacherapp.data.datasource.local.database.AppDatabase
-import com.example.teacherapp.domain.repository.AssignmentRepository
+import androidx.fragment.app.activityViewModels
+import com.example.teacherapp.R
 import com.example.teacherapp.databinding.DialogAddEditAssignmentBinding
-import com.example.teacherapp.presentation.viewmodel.assigment.AssignmentViewModel
-import com.example.teacherapp.presentation.viewmodel.assigment.AssignmentViewModelFactory
+import com.example.teacherapp.domain.model.Assignment
+import com.example.teacherapp.presentation.viewmodel.assignment.AssignmentViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddEditAssignmentDialogFragment : DialogFragment() {
+@AndroidEntryPoint
+class AddEditAssignmentDialog : DialogFragment() {
 
     private var _binding: DialogAddEditAssignmentBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: AssignmentViewModel
-    private var courseId: Int = -1
+    private val viewModel: AssignmentViewModel by activityViewModels()
+    private var courseId: String? = null
     private var assignment: Assignment? = null
 
-    private var onAssignmentSavedListener: ((Assignment) -> Unit)? = null
-
     companion object {
-        fun newInstance(courseId: Int, assignment: Assignment? = null): AddEditAssignmentDialogFragment {
-            val fragment = AddEditAssignmentDialogFragment()
-            fragment.courseId = courseId
-            fragment.assignment = assignment
-            return fragment
+        private const val ARG_COURSE_ID = "course_id"
+        private const val ARG_ASSIGNMENT = "assignment"
+
+        fun newInstance(courseId: String, assignment: Assignment? = null): AddEditAssignmentDialog {
+            return AddEditAssignmentDialog().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_COURSE_ID, courseId)
+                    putParcelable(ARG_ASSIGNMENT, assignment)
+                }
+            }
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(STYLE_NORMAL, R.style.FullScreenDialog)
+        courseId = arguments?.getString(ARG_COURSE_ID)
+        assignment = arguments?.getParcelable(ARG_ASSIGNMENT)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return super.onCreateDialog(savedInstanceState).apply {
-            setCanceledOnTouchOutside(false)
+            window?.setWindowAnimations(R.style.DialogAnimation)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = DialogAddEditAssignmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -50,88 +65,92 @@ class AddEditAssignmentDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val database = AppDatabase.getDatabase(requireContext())
-        val repository = AssignmentRepository(database.assignmentDao())
-        val factory = AssignmentViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory).get(AssignmentViewModel::class.java)
+        setupViews()
+        populateAssignment()
+    }
 
-        binding.dueDateEditText.setOnClickListener {
+    private fun setupViews() {
+        binding.toolbar.apply {
+            setNavigationOnClickListener { dismiss() }
+            title = if (assignment == null) "Add Assignment" else "Edit Assignment"
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.action_save -> {
+                        saveAssignment()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }
+
+        binding.dueDateInput.setOnClickListener {
             showDatePicker()
         }
-
-        binding.saveButton.setOnClickListener {
-            saveAssignment()
-        }
-
-        binding.cancelButton.setOnClickListener {
-            dismiss()
-        }
-
-        assignment?.let { populateFields(it) }
     }
 
-    private fun populateFields(assignment: Assignment) {
-        binding.titleEditText.setText(assignment.title)
-        binding.descriptionEditText.setText(assignment.description)
-        binding.dueDateEditText.setText(assignment.dueDate)
-        binding.statusSpinner.setSelection(getStatusPosition(assignment.status))
-    }
-
-    private fun getStatusPosition(status: String): Int {
-        return when (status) {
-            "pending" -> 0
-            "submitted" -> 1
-            "graded" -> 2
-            else -> 0
+    private fun populateAssignment() {
+        assignment?.let { assignment ->
+            binding.apply {
+                titleInput.setText(assignment.title)
+                descriptionInput.setText(assignment.description)
+                dueDateInput.setText(assignment.dueDate)
+                statusSpinner.setSelection(getStatusPosition(assignment.status))
+            }
         }
     }
 
     private fun showDatePicker() {
         val datePicker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("Select due date")
+            .setTitleText("Select Due Date")
             .build()
 
         datePicker.addOnPositiveButtonClickListener { selection ->
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            binding.dueDateEditText.setText(dateFormat.format(Date(selection)))
+            binding.dueDateInput.setText(dateFormat.format(Date(selection)))
         }
 
-        datePicker.show(childFragmentManager, "DATE_PICKER")
+        datePicker.show(childFragmentManager, "date_picker")
     }
 
     private fun saveAssignment() {
-        val title = binding.titleEditText.text.toString()
-        val description = binding.descriptionEditText.text.toString()
-        val dueDate = binding.dueDateEditText.text.toString()
+        val title = binding.titleInput.text.toString()
+        val description = binding.descriptionInput.text.toString()
+        val dueDate = binding.dueDateInput.text.toString()
         val status = binding.statusSpinner.selectedItem.toString()
 
-        if (title.isBlank() || description.isBlank() || dueDate.isBlank()) {
-
+        if (title.isBlank() || dueDate.isBlank()) {
+            binding.titleInputLayout.error = if (title.isBlank()) "Required" else null
+            binding.dueDateInputLayout.error = if (dueDate.isBlank()) "Required" else null
             return
         }
 
         val newAssignment = Assignment(
-            id = assignment?.id ?: 0,
+            id = assignment?.id ?: UUID.randomUUID().toString(),
             title = title,
             description = description,
             dueDate = dueDate,
-            courseId = courseId,
+            courseId = courseId ?: "",
             status = status
         )
 
         if (assignment == null) {
-            viewModel.saveAssignment(newAssignment)
+            viewModel.createAssignment(newAssignment)
         } else {
             viewModel.updateAssignment(newAssignment)
         }
-        onAssignmentSavedListener?.invoke(newAssignment)
 
         dismiss()
     }
-    fun setOnAssignmentSavedListener(listener: (Assignment) -> Unit) {
-        onAssignmentSavedListener = listener
-    }
 
+    private fun getStatusPosition(status: String): Int {
+        return when (status.lowercase()) {
+            "pending" -> 0
+            "in progress" -> 1
+            "completed" -> 2
+            else -> 0
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

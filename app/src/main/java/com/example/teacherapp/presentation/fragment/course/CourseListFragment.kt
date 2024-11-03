@@ -1,81 +1,78 @@
-package com.example.teacherapp.presentation.fragment.course
+package com.example.teacherapp.presentation.fragment
 
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.teacherapp.R
-import com.example.teacherapp.data.datasource.local.database.AppDatabase
-import com.example.teacherapp.domain.repository.CourseRepository
 import com.example.teacherapp.databinding.FragmentCourseListBinding
 import com.example.teacherapp.presentation.adapter.CourseAdapter
 import com.example.teacherapp.presentation.viewmodel.course.CourseViewModel
-import com.example.teacherapp.presentation.viewmodel.course.CourseViewModelFactory
+import com.example.teacherapp.presentation.viewmodel.course.CoursesState
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
-class CourseListFragment : Fragment(), CourseAdapter.CourseClickListener {
+@AndroidEntryPoint
+class CourseListFragment : Fragment(R.layout.fragment_course_list) {
 
     private var _binding: FragmentCourseListBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: CourseViewModel
+    private val viewModel: CourseViewModel by viewModels()
     private lateinit var adapter: CourseAdapter
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentCourseListBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentCourseListBinding.bind(view)
 
-        val database = AppDatabase.getDatabase(requireContext())
-        val repository = CourseRepository(database.courseDao())
-        viewModel = ViewModelProvider(this, CourseViewModelFactory(repository))[CourseViewModel::class.java]
+        setupRecyclerView()
+        observeState()
 
-        adapter = CourseAdapter(this)
-        binding.courseRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.courseRecyclerView.adapter = adapter
-
-        val teacherId = activity?.intent?.getIntExtra("TEACHER_ID", -1) ?: -1
-        viewModel.getCoursesForTeacher(teacherId)
-
-        viewModel.courses.observe(viewLifecycleOwner) { courses ->
-            adapter.submitList(courses)
-        }
+        val teacherId = requireActivity().intent.getStringExtra("TEACHER_ID") ?: return
+        viewModel.getCourses(teacherId)
     }
 
-    override fun onAttendanceClick(courseId: Int) {
-        Log.d("CourseListFragment", "Navigating to AttendanceFragment with courseId: $courseId")
-        val bundle = Bundle().apply {
-            putInt("COURSE_ID", courseId)
-        }
-        findNavController().navigate(R.id.action_courseListFragment_to_attendanceFragment, bundle)
-    }
-
-    override fun onAssignmentsClick(courseId: Int) {
-        Log.d("CourseListFragment", "Navigating to AssignmentListFragment with courseId: $courseId")
-        val bundle = Bundle().apply {
-            putInt("COURSE_ID", courseId)
-        }
-        findNavController().navigate(R.id.action_courseListFragment_to_assignmentListFragment, bundle)
-    }
-
-    override fun onStudentsClick(courseId: Int) {
-        Log.d("CourseListFragment", "onStudentsClick called with courseId: $courseId")
-        try {
-            val action = CourseListFragmentDirections.actionCourseListFragmentToStudentListFragment(courseId)
-            findNavController().navigate(action)
-        } catch (e: Exception) {
-            Log.e("CourseListFragment", "Navigation failed", e)
-            val bundle = Bundle().apply {
-                putInt("courseId", courseId)
+    private fun setupRecyclerView() {
+        adapter = CourseAdapter(
+            onAssignmentsClick = { courseId ->
+                findNavController().navigate(
+                    CourseListFragmentDirections.actionCourseListToAssignments(courseId)
+                )
+            },
+            onAttendanceClick = { courseId ->
+                findNavController().navigate(
+                    CourseListFragmentDirections.actionCourseListToAttendance(courseId)
+                )
+            },
+            onStudentsClick = { courseId ->
+                findNavController().navigate(
+                    CourseListFragmentDirections.actionCourseListToStudents(courseId)
+                )
             }
-            findNavController().navigate(R.id.studentListFragment, bundle)
+        )
+        binding.recyclerView.adapter = adapter
+    }
+
+    private fun observeState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.coursesState.collect { state ->
+                when (state) {
+                    is CoursesState.Loading -> {
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
+                    is CoursesState.Success -> {
+                        binding.progressBar.visibility = View.GONE
+                        adapter.submitList(state.courses)
+                    }
+                    is CoursesState.Error -> {
+                        binding.progressBar.visibility = View.GONE
+                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            }
         }
     }
 

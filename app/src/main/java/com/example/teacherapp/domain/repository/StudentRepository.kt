@@ -1,13 +1,11 @@
 package com.example.teacherapp.domain.repository
 
-import com.example.teacherapp.data.datasource.local.dao.StudentDao
+import com.example.teacherapp.domain.model.Student
+import kotlinx.coroutines.flow.Flow
 
-class StudentRepository(private val studentDao: StudentDao) {
-    suspend fun getStudentsForCourse(courseId: Int): List<Student> {
-        return studentDao.getStudentsForCourse(courseId)
-    }
-
-    suspend fun insert(student: Student) {
-        studentDao.insert(student)
-    }
+interface StudentRepository {
+    fun getStudentsForCourse(courseId: String): Flow<List<Student>>
+    suspend fun addStudent(student: Student): Result<Unit>
+    suspend fun updateStudent(student: Student): Result<Unit>
+    suspend fun deleteStudent(studentId: String): Result<Unit>
 }

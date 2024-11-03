@@ -1,24 +1,10 @@
 package com.example.teacherapp.domain.repository
 
-import android.util.Log
-import com.example.teacherapp.data.datasource.local.dao.AttendanceDao
-import com.example.teacherapp.data.datasource.local.dao.AttendanceWithStudentName
+import com.example.teacherapp.domain.model.Attendance
+import kotlinx.coroutines.flow.Flow
 
-class AttendanceRepository(private val attendanceDao: AttendanceDao) {
-
-    suspend fun getStudentsWithAttendanceForCourseAndDate(courseId: Int, date: String): List<AttendanceWithStudentName> {
-        Log.d("AttendanceRepository", "Fetching attendances for course $courseId on date $date")
-        val attendances = attendanceDao.getStudentsWithAttendanceForCourseAndDate(courseId, date)
-        Log.d("AttendanceRepository", "Retrieved ${attendances.size} attendances")
-        if (attendances.isEmpty()) {
-            Log.d("AttendanceRepository", "No attendances retrieved")
-        } else {
-            Log.d("AttendanceRepository", "First attendance: ${attendances[0]}")
-        }
-        return attendances
-    }
-
-    suspend fun saveAttendance(attendance: Attendance) {
-        attendanceDao.insertOrUpdateAttendance(attendance)
-    }
+interface AttendanceRepository {
+    fun getAttendanceForCourseAndDate(courseId: String, date: String): Flow<List<Attendance>>
+    suspend fun saveAttendance(attendance: Attendance): Result<Unit>
+    suspend fun saveMultipleAttendance(attendanceList: List<Attendance>): Result<Unit>
 }

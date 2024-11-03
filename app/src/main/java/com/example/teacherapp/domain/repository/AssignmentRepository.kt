@@ -1,25 +1,11 @@
 package com.example.teacherapp.domain.repository
 
-import com.example.teacherapp.data.datasource.local.dao.AssignmentDao
+import com.example.teacherapp.domain.model.Assignment
+import kotlinx.coroutines.flow.Flow
 
-class AssignmentRepository(private val assignmentDao: AssignmentDao) {
-    suspend fun getAssignmentsForCourse(courseId: Int): List<Assignment> {
-        return assignmentDao.getAssignmentsForCourse(courseId)
-    }
-
-    suspend fun insert(assignment: Assignment): Long {
-        return assignmentDao.insert(assignment)
-    }
-
-    suspend fun update(assignment: Assignment) {
-        assignmentDao.update(assignment)
-    }
-
-    suspend fun delete(assignment: Assignment) {
-        assignmentDao.delete(assignment)
-    }
-
-    suspend fun getNextId(): Int {
-        return (assignmentDao.getMaxId() ?: 0) + 1
-    }
+interface AssignmentRepository {
+    fun getAssignmentsForCourse(courseId: String): Flow<List<Assignment>>
+    suspend fun addAssignment(assignment: Assignment): Result<Unit>
+    suspend fun updateAssignment(assignment: Assignment): Result<Unit>
+    suspend fun deleteAssignment(assignmentId: String): Result<Unit>
 }

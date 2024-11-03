@@ -1,56 +1,66 @@
-<?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/courseListFragment">
 
     <fragment
         android:id="@+id/courseListFragment"
-        android:name="com.example.teacherapp.presentation.fragment.course.CourseListFragment"
-        android:label="Courses"
-        tools:layout="@layout/fragment_course_list">
-        <action
-            android:id="@+id/action_courseListFragment_to_attendanceFragment"
-            app:destination="@id/attendanceFragment" />
-        <action
-            android:id="@+id/action_courseListFragment_to_assignmentListFragment"
-            app:destination="@id/assignmentListFragment" />
-        <action
-            android:id="@+id/action_courseListFragment_to_studentListFragment"
-            app:destination="@id/studentListFragment" />
-    </fragment>
+        android:name="com.example.teacherapp.presentation.fragment.CourseListFragment"
+        android:label="Courses">
 
-    <fragment
-        android:id="@+id/attendanceFragment"
-        android:name="com.example.teacherapp.presentation.fragment.attendance.AttendanceFragment"
-        android:label="Attendance"
-        tools:layout="@layout/fragment_attendance">
-        <argument
-            android:name="courseId"
-            app:argType="integer"
-            android:defaultValue="-1"/>
+        <action
+            android:id="@+id/action_courseList_to_assignments"
+            app:destination="@id/assignmentListFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_courseList_to_attendance"
+            app:destination="@id/attendanceFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_courseList_to_students"
+            app:destination="@id/studentListFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <fragment
         android:id="@+id/assignmentListFragment"
-        android:name="com.example.teacherapp.presentation.fragment.assignment.AssignmentListFragment"
-        android:label="Assignments"
-        tools:layout="@layout/fragment_assignment_list">
+        android:name="com.example.teacherapp.presentation.fragment.AssignmentListFragment"
+        android:label="Assignments">
+
         <argument
             android:name="courseId"
-            app:argType="integer"
-            android:defaultValue="-1" />
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/attendanceFragment"
+        android:name="com.example.teacherapp.presentation.fragment.AttendanceFragment"
+        android:label="Attendance">
+
+        <argument
+            android:name="courseId"
+            app:argType="string" />
     </fragment>
 
     <fragment
         android:id="@+id/studentListFragment"
-        android:name="com.example.teacherapp.presentation.fragment.student.StudentListFragment"
-        android:label="Students"
-        tools:layout="@layout/fragment_student_list">
+        android:name="com.example.teacherapp.presentation.fragment.StudentListFragment"
+        android:label="Students">
+
         <argument
             android:name="courseId"
-            app:argType="integer"
-            android:defaultValue="-1"/>
+            app:argType="string" />
     </fragment>
+
 </navigation>

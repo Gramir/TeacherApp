@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.teacherapp.databinding.ItemAssignmentBinding
+import com.example.teacherapp.domain.model.Assignment
 
 class AssignmentAdapter(
     private val onEditClick: (Assignment) -> Unit,
@@ -13,27 +14,32 @@ class AssignmentAdapter(
 ) : ListAdapter<Assignment, AssignmentAdapter.AssignmentViewHolder>(AssignmentDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AssignmentViewHolder {
-        val binding = ItemAssignmentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return AssignmentViewHolder(binding, onEditClick, onDeleteClick)
+        val binding = ItemAssignmentBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return AssignmentViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: AssignmentViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class AssignmentViewHolder(
-        private val binding: ItemAssignmentBinding,
-        private val onEditClick: (Assignment) -> Unit,
-        private val onDeleteClick: (Assignment) -> Unit
+    inner class AssignmentViewHolder(
+        private val binding: ItemAssignmentBinding
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(assignment: Assignment) {
-            binding.assignmentTitleTextView.text = assignment.title
-            binding.assignmentDescriptionTextView.text = assignment.description
-            binding.assignmentDueDateTextView.text = assignment.dueDate
-            binding.assignmentStatusTextView.text = assignment.status
 
-            binding.editAssignmentButton.setOnClickListener { onEditClick(assignment) }
-            binding.deleteAssignmentButton.setOnClickListener { onDeleteClick(assignment) }
+        fun bind(assignment: Assignment) {
+            binding.apply {
+                titleText.text = assignment.title
+                descriptionText.text = assignment.description
+                dueDateText.text = assignment.dueDate
+                statusText.text = assignment.status
+
+                editButton.setOnClickListener { onEditClick(assignment) }
+                deleteButton.setOnClickListener { onDeleteClick(assignment) }
+            }
         }
     }
 

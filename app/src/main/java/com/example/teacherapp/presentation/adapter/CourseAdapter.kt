@@ -1,40 +1,43 @@
 package com.example.teacherapp.presentation.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.teacherapp.databinding.ItemCourseBinding
+import com.example.teacherapp.domain.model.Course
 
-class CourseAdapter(private val listener: CourseClickListener) : ListAdapter<Course, CourseAdapter.CourseViewHolder>(
-    CourseDiffCallback()
-) {
-
-    interface CourseClickListener {
-        fun onAttendanceClick(courseId: Int)
-        fun onAssignmentsClick(courseId: Int)
-        fun onStudentsClick(courseId: Int)
-    }
+class CourseAdapter(
+    private val onAssignmentsClick: (String) -> Unit,
+    private val onAttendanceClick: (String) -> Unit,
+    private val onStudentsClick: (String) -> Unit
+) : ListAdapter<Course, CourseAdapter.CourseViewHolder>(CourseDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
-        val binding = ItemCourseBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return CourseViewHolder(binding, listener)
+        val binding = ItemCourseBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return CourseViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class CourseViewHolder(private val binding: ItemCourseBinding, private val listener: CourseClickListener) : RecyclerView.ViewHolder(binding.root) {
+    inner class CourseViewHolder(
+        private val binding: ItemCourseBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
         fun bind(course: Course) {
-            binding.courseNameTextView.text = course.name
-            binding.attendanceButton.setOnClickListener { listener.onAttendanceClick(course.id) }
-            binding.assignmentsButton.setOnClickListener { listener.onAssignmentsClick(course.id) }
-            binding.studentsButton.setOnClickListener {
-                Log.d("CourseAdapter", "Students button clicked for course: ${course.id}")
-                listener.onStudentsClick(course.id) }
+            binding.apply {
+                courseNameText.text = course.name
+                assignmentsButton.setOnClickListener { onAssignmentsClick(course.id) }
+                attendanceButton.setOnClickListener { onAttendanceClick(course.id) }
+                studentsButton.setOnClickListener { onStudentsClick(course.id) }
+            }
         }
     }
 

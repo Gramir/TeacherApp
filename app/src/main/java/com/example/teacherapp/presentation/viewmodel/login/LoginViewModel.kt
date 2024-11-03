@@ -1,29 +1,47 @@
 package com.example.teacherapp.presentation.viewmodel.login
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teacherapp.domain.repository.TeacherRepository
+import com.example.teacherapp.domain.model.Teacher
+import com.example.teacherapp.domain.usecase.auth.LoginUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(private val repository: TeacherRepository) : ViewModel() {
-    private val _loginResult = MutableLiveData<LoginResult>()
-    val loginResult: LiveData<LoginResult> = _loginResult
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val loginUseCase: LoginUseCase
+) : ViewModel() {
+
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Initial)
+    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            val teacher = repository.login(username, password)
-            if (teacher != null) {
-                _loginResult.value = LoginResult.Success(teacher)
-            } else {
-                _loginResult.value = LoginResult.Error
+            _loginState.value = LoginState.Loading
+            try {
+                val result = loginUseCase(username, password)
+                result.fold(
+                    onSuccess = { teacher ->
+                        _loginState.value = LoginState.Success(teacher)
+                    },
+                    onFailure = { exception ->
+                        _loginState.value = LoginState.Error(exception.message ?: "Unknown error")
+                    }
+                )
+            } catch (e: Exception) {
+                _loginState.value = LoginState.Error(e.message ?: "Unknown error")
             }
         }
     }
 }
 
-sealed class LoginResult {
-    data class Success(val teacher: Teacher) : LoginResult()
-    data object Error : LoginResult()
+sealed class LoginState {
+    object Initial : LoginState()
+    object Loading : LoginState()
+    data class Success(val teacher: Teacher) : LoginState()
+    data class Error(val message: String) : LoginState()
 }

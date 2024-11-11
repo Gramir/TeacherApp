@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetAttendanceUseCase @Inject constructor(
     private val repository: AttendanceRepository
 ) {
-    operator fun invoke(courseId: String, date: String): Flow<List<Attendance>> {
-        return repository.getAttendanceForCourseAndDate(courseId, date)
-    }
+    operator fun invoke(courseId: String, date: String): Flow<List<Attendance>> =
+         repository.getAttendanceForCourseAndDate(courseId, date)
+
 }

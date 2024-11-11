@@ -1,35 +1,109 @@
 package com.example.teacherapp.presentation.viewmodel.attendance
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teacherapp.data.datasource.local.dao.AttendanceWithStudentName
-import com.example.teacherapp.domain.repository.AttendanceRepository
+import com.example.teacherapp.domain.model.Attendance
+import com.example.teacherapp.domain.usecase.attendance.GetAttendanceUseCase
+import com.example.teacherapp.domain.usecase.attendance.SaveAttendanceUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AttendanceViewModel(private val repository: AttendanceRepository) : ViewModel() {
-    private val _attendances = MutableLiveData<List<AttendanceWithStudentName>>()
-    val attendances: LiveData<List<AttendanceWithStudentName>> = _attendances
+private const val TAG = "AttendanceViewModel"
 
-    fun getStudentsWithAttendanceForCourseAndDate(courseId: Int, date: String) {
+@HiltViewModel
+class AttendanceViewModel @Inject constructor(
+    private val getAttendanceUseCase: GetAttendanceUseCase,
+    private val saveAttendanceUseCase: SaveAttendanceUseCase
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<AttendanceUiState>(AttendanceUiState.Loading)
+    val uiState: StateFlow<AttendanceUiState> = _uiState.asStateFlow()
+
+    private val _attendances = MutableStateFlow<List<AttendanceWithStudent>>(emptyList())
+    val attendances: StateFlow<List<AttendanceWithStudent>> = _attendances.asStateFlow()
+
+    fun getStudentsWithAttendanceForCourseAndDate(courseId: String, date: String) {
         viewModelScope.launch {
-            Log.d("AttendanceViewModel", "Fetching attendances for course $courseId on date $date")
-            val attendanceList = repository.getStudentsWithAttendanceForCourseAndDate(courseId, date)
-            Log.d("AttendanceViewModel", "Retrieved ${attendanceList.size} attendances")
-            if (attendanceList.isEmpty()) {
-                Log.d("AttendanceViewModel", "No attendances retrieved")
-            } else {
-                Log.d("AttendanceViewModel", "First attendance: ${attendanceList[0]}")
+            _uiState.value = AttendanceUiState.Loading
+            try {
+                Log.d(TAG, "Fetching attendances for course $courseId on date $date")
+                getAttendanceUseCase(courseId, date).collect { attendanceList ->
+                    Log.d(TAG, "Retrieved ${attendanceList.size} attendances")
+                    _attendances.value = attendanceList.map { it.toAttendanceWithStudent() }
+                    _uiState.value = AttendanceUiState.Success
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in getStudentsWithAttendanceForCourseAndDate", e)
+                _uiState.value = AttendanceUiState.Error(e.message ?: "Unknown error")
             }
-            _attendances.value = attendanceList
         }
     }
 
-    fun saveAttendance(attendance: Attendance) {
+    fun saveAttendance(attendanceList: List<AttendanceWithStudent>) {
         viewModelScope.launch {
-            repository.saveAttendance(attendance)
+            _uiState.value = AttendanceUiState.Loading
+            try {
+                val result = saveAttendanceUseCase(attendanceList.map { it.toAttendance() })
+                result.fold(
+                    onSuccess = {
+                        Log.d(TAG, "Attendance saved successfully")
+                        _uiState.value = AttendanceUiState.Success
+                    },
+                    onFailure = { error ->
+                        Log.e(TAG, "Error saving attendance", error)
+                        _uiState.value = AttendanceUiState.Error(error.message ?: "Unknown error")
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in saveAttendance", e)
+                _uiState.value = AttendanceUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun updateAttendanceStatus(studentId: String, isPresent: Boolean) {
+        val currentList = _attendances.value.toMutableList()
+        val index = currentList.indexOfFirst { it.studentId == studentId }
+        if (index != -1) {
+            currentList[index] = currentList[index].copy(present = isPresent)
+            _attendances.value = currentList
         }
     }
 }
+
+sealed class AttendanceUiState {
+    object Loading : AttendanceUiState()
+    object Success : AttendanceUiState()
+    data class Error(val message: String) : AttendanceUiState()
+}
+
+data class AttendanceWithStudent(
+    val id: String = "",
+    val studentId: String,
+    val studentName: String,
+    val courseId: String,
+    val date: String,
+    val present: Boolean
+) {
+    fun toAttendance() = Attendance(
+        id = id,
+        studentId = studentId,
+        courseId = courseId,
+        date = date,
+        present = present
+    )
+}
+
+private fun Attendance.toAttendanceWithStudent() = AttendanceWithStudent(
+    id = id,
+    studentId = studentId,
+    studentName = "", // Se obtendrá del estudiante en Firebase
+    courseId = courseId,
+    date = date,
+    present = present
+)

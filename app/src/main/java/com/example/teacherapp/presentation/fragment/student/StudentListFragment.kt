@@ -15,7 +15,9 @@ import com.example.teacherapp.databinding.FragmentStudentListBinding
 import com.example.teacherapp.presentation.adapter.StudentAdapter
 import com.example.teacherapp.presentation.viewmodel.student.StudentViewModel
 import com.example.teacherapp.presentation.viewmodel.student.StudentViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class StudentListFragment : Fragment() {
     private var _binding: FragmentStudentListBinding? = null
     private val binding get() = _binding!!

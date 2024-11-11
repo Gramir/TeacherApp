@@ -1,4 +1,3 @@
 package com.example.teacherapp.data.model
 
-class StudentEntity {
-}
+class StudentEntity

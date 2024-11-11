@@ -4,9 +4,12 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android) apply false
     id("com.google.gms.google-services") version "4.4.2" apply false
     id("com.google.devtools.ksp") version "1.8.10-1.0.9" apply false
+    id("com.google.dagger.hilt.android") version "2.48" apply false
 }
 buildscript {
     dependencies {
-        classpath ("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7")
+        classpath (libs.androidx.navigation.safe.args.gradle.plugin)
+        classpath (libs.google.services)
+        classpath(libs.hilt.android.gradle.plugin)
     }
 }

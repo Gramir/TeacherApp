@@ -11,9 +11,9 @@ import com.example.teacherapp.databinding.FragmentAssignmentListBinding
 import com.example.teacherapp.domain.model.Assignment
 import com.example.teacherapp.presentation.adapter.AssignmentAdapter
 import com.example.teacherapp.presentation.dialog.AddEditAssignmentDialog
-import com.example.teacherapp.presentation.viewmodel.assignment.ActionState
-import com.example.teacherapp.presentation.viewmodel.assignment.AssignmentViewModel
-import com.example.teacherapp.presentation.viewmodel.assignment.AssignmentsState
+import com.example.teacherapp.presentation.viewmodel.assigment.ActionState
+import com.example.teacherapp.presentation.viewmodel.assigment.AssignmentViewModel
+import com.example.teacherapp.presentation.viewmodel.assigment.AssignmentsState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,11 +49,11 @@ class AssignmentListFragment : Fragment(R.layout.fragment_assignment_list) {
                 showDeleteConfirmation(assignment)
             }
         )
-        binding.recyclerView.adapter = adapter
+        binding.assignmentRecyclerView.adapter = adapter
     }
 
     private fun setupViews() {
-        binding.addButton.setOnClickListener {
+        binding.addAssignmentButton.setOnClickListener {
             showAddEditDialog(null)
         }
     }
@@ -64,14 +64,14 @@ class AssignmentListFragment : Fragment(R.layout.fragment_assignment_list) {
                 viewModel.assignmentsState.collect { state ->
                     when (state) {
                         is AssignmentsState.Loading -> {
-                            binding.progressBar.visibility = View.VISIBLE
+                            binding.assignmentProgressBar.visibility = View.VISIBLE
                         }
                         is AssignmentsState.Success -> {
-                            binding.progressBar.visibility = View.GONE
+                            binding.assignmentProgressBar.visibility = View.GONE
                             adapter.submitList(state.assignments)
                         }
                         is AssignmentsState.Error -> {
-                            binding.progressBar.visibility = View.GONE
+                            binding.assignmentProgressBar.visibility = View.GONE
                             Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                         }
                     }
@@ -82,20 +82,20 @@ class AssignmentListFragment : Fragment(R.layout.fragment_assignment_list) {
                 viewModel.actionState.collect { state ->
                     when (state) {
                         is ActionState.Loading -> {
-                            binding.progressBar.visibility = View.VISIBLE
+                            binding.assignmentProgressBar.visibility = View.VISIBLE
                         }
                         is ActionState.Success -> {
-                            binding.progressBar.visibility = View.GONE
+                            binding.assignmentProgressBar.visibility = View.GONE
                             viewModel.getAssignments(args.courseId)
                             viewModel.resetActionState()
                         }
                         is ActionState.Error -> {
-                            binding.progressBar.visibility = View.GONE
+                            binding.assignmentProgressBar.visibility = View.GONE
                             Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                             viewModel.resetActionState()
                         }
                         is ActionState.Idle -> {
-                            binding.progressBar.visibility = View.GONE
+                            binding.assignmentProgressBar.visibility = View.GONE
                         }
                     }
                 }

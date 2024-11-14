@@ -1,4 +1,4 @@
-package com.example.teacherapp.presentation.viewmodel.assignment
+package com.example.teacherapp.presentation.viewmodel.assigment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,20 +15,27 @@ class AssignmentViewModel @Inject constructor(
     private val getAssignmentsUseCase: GetAssignmentsUseCase,
     private val createAssignmentUseCase: CreateAssignmentUseCase,
     private val updateAssignmentUseCase: UpdateAssignmentUseCase,
-    private val deleteAssignmentUseCase: DeleteAssignmentUseCase,
-    private val notificationService: NotificationService
+    private val deleteAssignmentUseCase: DeleteAssignmentUseCase
 ) : ViewModel() {
 
     private val _assignmentsState = MutableStateFlow<AssignmentsState>(AssignmentsState.Loading)
-    val assignmentsState: StateFlow<AssignmentsState> = _assignmentsState.asStateFlow()
+    val assignmentsState: StateFlow<AssignmentsState> = _assignmentsState
 
     private val _actionState = MutableStateFlow<ActionState>(ActionState.Idle)
-    val actionState: StateFlow<ActionState> = _actionState.asStateFlow()
+    val actionState: StateFlow<ActionState> = _actionState
+
+    private val _selectedAssignment = MutableStateFlow<Assignment?>(null)
+    val selectedAssignment: StateFlow<Assignment?> = _selectedAssignment
+
+    private val assignmentsList = mutableListOf<Assignment>()
 
     fun getAssignments(courseId: String) {
         viewModelScope.launch {
+            _assignmentsState.value = AssignmentsState.Loading
             try {
                 getAssignmentsUseCase(courseId).collect { assignments ->
+                    assignmentsList.clear()
+                    assignmentsList.addAll(assignments)
                     _assignmentsState.value = AssignmentsState.Success(assignments)
                 }
             } catch (e: Exception) {
@@ -37,19 +44,16 @@ class AssignmentViewModel @Inject constructor(
         }
     }
 
+    fun getAssignment(assignmentId: String) {
+        _selectedAssignment.value = assignmentsList.find { it.id == assignmentId }
+    }
+
     fun createAssignment(assignment: Assignment) {
         viewModelScope.launch {
             _actionState.value = ActionState.Loading
             try {
-                createAssignmentUseCase(assignment).fold(
-                    onSuccess = {
-                        _actionState.value = ActionState.Success
-                        notificationService.showNewAssignmentNotification(assignment)
-                    },
-                    onFailure = { e ->
-                        _actionState.value = ActionState.Error(e.message ?: "Unknown error")
-                    }
-                )
+                createAssignmentUseCase(assignment)
+                _actionState.value = ActionState.Success
             } catch (e: Exception) {
                 _actionState.value = ActionState.Error(e.message ?: "Unknown error")
             }
@@ -60,14 +64,8 @@ class AssignmentViewModel @Inject constructor(
         viewModelScope.launch {
             _actionState.value = ActionState.Loading
             try {
-                updateAssignmentUseCase(assignment).fold(
-                    onSuccess = {
-                        _actionState.value = ActionState.Success
-                    },
-                    onFailure = { e ->
-                        _actionState.value = ActionState.Error(e.message ?: "Unknown error")
-                    }
-                )
+                updateAssignmentUseCase(assignment)
+                _actionState.value = ActionState.Success
             } catch (e: Exception) {
                 _actionState.value = ActionState.Error(e.message ?: "Unknown error")
             }
@@ -78,18 +76,16 @@ class AssignmentViewModel @Inject constructor(
         viewModelScope.launch {
             _actionState.value = ActionState.Loading
             try {
-                deleteAssignmentUseCase(assignmentId).fold(
-                    onSuccess = {
-                        _actionState.value = ActionState.Success
-                    },
-                    onFailure = { e ->
-                        _actionState.value = ActionState.Error(e.message ?: "Unknown error")
-                    }
-                )
+                deleteAssignmentUseCase(assignmentId)
+                _actionState.value = ActionState.Success
             } catch (e: Exception) {
                 _actionState.value = ActionState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun clearSelectedAssignment() {
+        _selectedAssignment.value = null
     }
 
     fun resetActionState() {

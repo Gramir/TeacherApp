@@ -56,4 +56,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="confirm_delete">Are you sure you want to delete this?</string>
+    <string name="status">Status</string>
+    <string name="description">Description</string>
 </resources>

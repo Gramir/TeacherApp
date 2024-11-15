@@ -11,8 +11,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FirebaseDataSource @Inject constructor() {
-    private val firestore = FirebaseFirestore.getInstance()
+class FirebaseDataSource @Inject constructor(
+    private val firestore: FirebaseFirestore
+) {
 
     fun getTeacher(username: String): Flow<Teacher?> = callbackFlow {
         val subscription = firestore.collection("teachers")

@@ -2,7 +2,6 @@ package com.example.teacherapp.presentation.viewmodel.assigment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teacherapp.data.service.NotificationService
 import com.example.teacherapp.domain.model.Assignment
 import com.example.teacherapp.domain.usecase.assignment.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -94,14 +93,14 @@ class AssignmentViewModel @Inject constructor(
 }
 
 sealed class AssignmentsState {
-    object Loading : AssignmentsState()
+    data object Loading : AssignmentsState()
     data class Success(val assignments: List<Assignment>) : AssignmentsState()
     data class Error(val message: String) : AssignmentsState()
 }
 
 sealed class ActionState {
-    object Idle : ActionState()
-    object Loading : ActionState()
-    object Success : ActionState()
+    data object Idle : ActionState()
+    data object Loading : ActionState()
+    data object Success : ActionState()
     data class Error(val message: String) : ActionState()
 }

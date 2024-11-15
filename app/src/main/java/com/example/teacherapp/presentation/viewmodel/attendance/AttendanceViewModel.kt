@@ -77,8 +77,8 @@ class AttendanceViewModel @Inject constructor(
 }
 
 sealed class AttendanceUiState {
-    object Loading : AttendanceUiState()
-    object Success : AttendanceUiState()
+    data object Loading : AttendanceUiState()
+    data object Success : AttendanceUiState()
     data class Error(val message: String) : AttendanceUiState()
 }
 

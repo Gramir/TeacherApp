@@ -1,3 +1,6 @@
+package com.example.teacherapp.presentation.fragment.attendance
+
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +15,7 @@ import com.example.teacherapp.databinding.FragmentAttendanceBinding
 import com.example.teacherapp.presentation.adapter.AttendanceAdapter
 import com.example.teacherapp.presentation.viewmodel.attendance.AttendanceUiState
 import com.example.teacherapp.presentation.viewmodel.attendance.AttendanceViewModel
-import com.example.teacherapp.ui.util.DatePickerFragment
+import com.example.teacherapp.util.DatePickerFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -75,8 +78,8 @@ class AttendanceFragment : Fragment() {
 
     private fun setupSaveButton() {
         binding.saveButton.setOnClickListener {
-            courseId?.let { cid ->
-                currentDate?.let { date ->
+            courseId?.let {
+                currentDate?.let {
                     viewModel.saveAttendance(adapter.currentList)
                 }
             }
@@ -114,6 +117,7 @@ class AttendanceFragment : Fragment() {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     private fun showDatePickerDialog() {
         val datePickerFragment = DatePickerFragment { day, month, year ->
             currentDate = String.format("%04d-%02d-%02d", year, month + 1, day)
@@ -134,6 +138,6 @@ class AttendanceFragment : Fragment() {
     }
 
     companion object {
-        private const val TAG = "AttendanceFragment"
+       // private const val TAG = "AttendanceFragment"
     }
 }

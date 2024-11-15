@@ -73,6 +73,6 @@ class StudentAdapter(
     }
 
     companion object {
-        private const val TAG = "StudentAdapter"
+        //private const val TAG = "StudentAdapter"
     }
 }

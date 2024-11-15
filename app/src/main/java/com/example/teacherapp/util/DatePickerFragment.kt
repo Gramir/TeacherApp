@@ -1,4 +1,4 @@
-package com.example.teacherapp.ui.util
+package com.example.teacherapp.util
 
 import android.app.DatePickerDialog
 import android.app.Dialog

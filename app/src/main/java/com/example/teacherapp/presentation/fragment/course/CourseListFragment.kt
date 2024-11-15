@@ -1,4 +1,4 @@
-package com.example.teacherapp.presentation.fragment
+package com.example.teacherapp.presentation.fragment.course
 
 import android.os.Bundle
 import android.view.View

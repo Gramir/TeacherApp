@@ -19,59 +19,50 @@ object UseCaseModule {
     // Auth Use Cases
     @Provides
     @ViewModelScoped
-    fun provideLoginUseCase(repository: TeacherRepository): LoginUseCase {
-        return LoginUseCase(repository)
-    }
+    fun provideLoginUseCase(repository: TeacherRepository) =
+        LoginUseCase(repository)
 
     // Course Use Cases
     @Provides
     @ViewModelScoped
-    fun provideGetCoursesUseCase(repository: CourseRepository): GetCoursesUseCase {
-        return GetCoursesUseCase(repository)
-    }
+    fun provideGetCoursesUseCase(repository: CourseRepository) =
+        GetCoursesUseCase(repository)
 
     // Assignment Use Cases
     @Provides
     @ViewModelScoped
-    fun provideGetAssignmentsUseCase(repository: AssignmentRepository): GetAssignmentsUseCase {
-        return GetAssignmentsUseCase(repository)
-    }
+    fun provideGetAssignmentsUseCase(repository: AssignmentRepository) =
+        GetAssignmentsUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideCreateAssignmentUseCase(repository: AssignmentRepository): CreateAssignmentUseCase {
-        return CreateAssignmentUseCase(repository)
-    }
+    fun provideCreateAssignmentUseCase(repository: AssignmentRepository) =
+        CreateAssignmentUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideUpdateAssignmentUseCase(repository: AssignmentRepository): UpdateAssignmentUseCase {
-        return UpdateAssignmentUseCase(repository)
-    }
+    fun provideUpdateAssignmentUseCase(repository: AssignmentRepository) =
+        UpdateAssignmentUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideDeleteAssignmentUseCase(repository: AssignmentRepository): DeleteAssignmentUseCase {
-        return DeleteAssignmentUseCase(repository)
-    }
+    fun provideDeleteAssignmentUseCase(repository: AssignmentRepository) =
+        DeleteAssignmentUseCase(repository)
 
     // Attendance Use Cases
     @Provides
     @ViewModelScoped
-    fun provideGetAttendanceUseCase(repository: AttendanceRepository): GetAttendanceUseCase {
-        return GetAttendanceUseCase(repository)
-    }
+    fun provideGetAttendanceUseCase(repository: AttendanceRepository) =
+        GetAttendanceUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideSaveAttendanceUseCase(repository: AttendanceRepository): SaveAttendanceUseCase {
-        return SaveAttendanceUseCase(repository)
-    }
+    fun provideSaveAttendanceUseCase(repository: AttendanceRepository) =
+        SaveAttendanceUseCase(repository)
 
     // Student Use Cases
     @Provides
     @ViewModelScoped
-    fun provideGetStudentsUseCase(repository: StudentRepository): GetStudentsUseCase {
-        return GetStudentsUseCase(repository)
-    }
+    fun provideGetStudentsUseCase(repository: StudentRepository) =
+        GetStudentsUseCase(repository)
 }

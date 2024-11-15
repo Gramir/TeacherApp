@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/courseListFragment"
-        android:name="com.example.teacherapp.presentation.fragment.CourseListFragment"
+        android:name="com.example.teacherapp.presentation.fragment.course.CourseListFragment"
         android:label="Courses">
 
         <action
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/assignmentListFragment"
-        android:name="com.example.teacherapp.presentation.fragment.AssignmentListFragment"
+        android:name="com.example.teacherapp.presentation.fragment.assignment.AssignmentListFragment"
         android:label="Assignments">
 
         <argument

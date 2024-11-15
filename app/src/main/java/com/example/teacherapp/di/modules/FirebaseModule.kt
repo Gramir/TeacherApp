@@ -1,6 +1,7 @@
 package com.example.teacherapp.di.modules
 
 import com.example.teacherapp.data.datasource.remote.firebase.FirebaseDataSource
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +14,12 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseDataSource(): FirebaseDataSource {
-        return FirebaseDataSource()
-    }
+    fun provideFirebaseFirestore(): FirebaseFirestore =
+        FirebaseFirestore.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideFirebaseDataSource(
+        firestore: FirebaseFirestore
+    ): FirebaseDataSource = FirebaseDataSource(firestore)
 }

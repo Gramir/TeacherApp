@@ -6,5 +6,5 @@ data class Teacher(
     val username: String = "",
     val name: String = "",
     val email: String = "",
-
+    val password: String = "", //No se enviara a firebase
 )

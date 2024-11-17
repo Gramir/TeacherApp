@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var notificationService: NotificationService
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->

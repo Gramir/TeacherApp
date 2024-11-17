@@ -1,6 +1,7 @@
 package com.example.teacherapp.data.datasource.remote.firebase
 
 import com.example.teacherapp.domain.model.*
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
@@ -12,8 +13,74 @@ import javax.inject.Singleton
 
 @Singleton
 class FirebaseDataSource @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val auth : FirebaseAuth
 ) {
+    suspend fun verifyTeacher(username: String, password: String): Result<Teacher> {
+        return try {
+            // 1. Buscar el profesor por username
+            val teacherQuery = firestore.collection("teachers")
+                .whereEqualTo("username", username)
+                .get()
+                .await()
+
+            val teacherDoc = teacherQuery.documents.firstOrNull()
+                ?: return Result.failure(Exception("Usuario no encontrado"))
+
+            val teacher = teacherDoc.toObject(Teacher::class.java)
+                ?: return Result.failure(Exception("Error al obtener datos del usuario"))
+
+            // 2. Convertir username a email para Firebase Auth
+            val email = "${username.lowercase()}@teacherapp.com"
+
+            try {
+                // 3. Verificar credenciales con Firebase Auth
+                auth.signInWithEmailAndPassword(email, password).await()
+                Result.success(teacher)
+            } catch (e: Exception) {
+                Result.failure(Exception("Contraseña incorrecta"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createTeacher(username: String, password: String, name: String): Result<Teacher> {
+        return try {
+            // 1. Verificar si el username ya existe
+            val existingTeacher = firestore.collection("teachers")
+                .whereEqualTo("username", username)
+                .get()
+                .await()
+                .documents
+                .firstOrNull()
+
+            if (existingTeacher != null) {
+                return Result.failure(Exception("El nombre de usuario ya existe"))
+            }
+
+            // 2. Crear usuario en Firebase Auth
+            val email = "${username.lowercase()}@teacherapp.com"
+            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+            val userId = authResult.user?.uid ?: throw Exception("Error al crear usuario")
+
+            // 3. Crear documento en Firestore
+            val teacher = Teacher(
+                id = userId,
+                username = username,
+                name = name
+            )
+
+            firestore.collection("teachers")
+                .document(userId)
+                .set(teacher)
+                .await()
+
+            Result.success(teacher)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     fun getTeacher(username: String): Flow<Teacher?> = callbackFlow {
         val subscription = firestore.collection("teachers")

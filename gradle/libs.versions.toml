@@ -1,25 +1,27 @@
 [versions]
-agp = "8.5.0"
-firebaseBom = "33.5.1"
+agp = "8.7.2"
+firebaseAuthKtx = "22.3.1"
+firebaseBom = "33.6.0"
 googleServices = "4.4.2"
-hiltAndroidCompiler = "2.44"
+hiltAndroidCompiler = "2.48"
 hiltAndroidGradlePlugin = "2.48"
-kotlin = "1.9.0"
-coreKtx = "1.13.1"
+kotlin = "1.9.24"
+coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-kotlinStdlib = "1.9.0"
-lifecycleRuntimeKtx = "2.8.3"
-activityCompose = "1.9.0"
-composeBom = "2024.04.01"
-navigationFragmentKtx = "2.8.3"
-navigationSafeArgsGradlePlugin = "2.8.3"
-navigationUiKtx = "2.8.3"
+kotlinStdlib = "1.9.24"
+kotlinxCoroutinesAndroid = "1.7.3"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.11.00"
+navigationFragmentKtx = "2.8.4"
+navigationSafeArgsGradlePlugin = "2.8.4"
+navigationUiKtx = "2.8.4"
 roomRuntime = "2.6.1"
 googleGmsGoogleServices = "4.4.2"
 firebaseFirestore = "25.1.1"
-firebaseMessagingKtx = "24.0.3"
+firebaseMessagingKtx = "24.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +31,7 @@ androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx",
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
@@ -50,6 +53,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

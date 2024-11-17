@@ -5,5 +5,6 @@ data class Attendance(
     val studentId: String = "",
     val courseId: String = "",
     val date: String = "",
-    val present: Boolean = false
+    val present: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
 )

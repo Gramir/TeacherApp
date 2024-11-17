@@ -28,7 +28,8 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-            insertTestDataIfNeeded()
+        // Solo se ejecuta una vez
+           // insertTestDataIfNeeded()
 
         setupViews()
         observeState()

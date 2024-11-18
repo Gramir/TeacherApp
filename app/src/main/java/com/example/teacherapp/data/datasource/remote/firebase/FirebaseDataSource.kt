@@ -117,27 +117,84 @@ class FirebaseDataSource @Inject constructor(
     }
 
     fun getStudentsForCourse(courseId: String): Flow<List<Student>> = callbackFlow {
-        val subscription = firestore.collection("students")
+        println("DEBUG_APP: ===== INICIO BÚSQUEDA DE ESTUDIANTES =====")
+        println("DEBUG_APP: Buscando estudiantes para courseId: $courseId")
+
+        // Verificar que la colección course_students existe y tiene el documento
+        val courseStudentsCheck = firestore.collection("course_students")
+            .whereEqualTo("courseId", courseId)
+            .get()
+            .await()
+
+        println("DEBUG_APP: Documentos en course_students: ${courseStudentsCheck.documents.size}")
+        courseStudentsCheck.documents.forEach { doc ->
+            println("DEBUG_APP: Documento course_students:")
+            println("DEBUG_APP: - ID: ${doc.id}")
+            println("DEBUG_APP: - Data: ${doc.data}")
+        }
+
+        val subscription = firestore.collection("course_students")
             .whereEqualTo("courseId", courseId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    println("DEBUG_APP: Error en listener: ${error.message}")
                     close(error)
                     return@addSnapshotListener
                 }
 
-                val students = snapshot?.documents?.mapNotNull {
-                    it.toObject(Student::class.java)
+                println("DEBUG_APP: Snapshot recibido, documentos: ${snapshot?.documents?.size}")
+
+                val studentIds = snapshot?.documents?.mapNotNull { doc ->
+                    val data = doc.data
+                    println("DEBUG_APP: Documento encontrado:")
+                    data?.forEach { (key, value) ->
+                        println("DEBUG_APP: - $key: $value")
+                    }
+                    doc.getString("studentId")
                 } ?: emptyList()
-                trySend(students)
+
+                println("DEBUG_APP: StudentIds encontrados: $studentIds")
+
+                if (studentIds.isEmpty()) {
+                    println("DEBUG_APP: No se encontraron studentIds")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+
+                // Buscar en students
+                firestore.collection("students")
+                    .whereIn("id", studentIds)
+                    .get()
+                    .addOnSuccessListener { studentsSnapshot ->
+                        println("DEBUG_APP: Búsqueda en students completada")
+                        println("DEBUG_APP: Documentos encontrados: ${studentsSnapshot.documents.size}")
+
+                        studentsSnapshot.documents.forEach { doc ->
+                            println("DEBUG_APP: Documento student:")
+                            println("DEBUG_APP: - ID: ${doc.id}")
+                            println("DEBUG_APP: - Data: ${doc.data}")
+                        }
+
+                        val students = studentsSnapshot.documents.mapNotNull {
+                            it.toObject(Student::class.java)
+                        }
+                        println("DEBUG_APP: Estudiantes convertidos: ${students.size}")
+                        trySend(students)
+                    }
+                    .addOnFailureListener { e ->
+                        println("DEBUG_APP: Error al obtener students: ${e.message}")
+                        close(e)
+                    }
             }
 
-        awaitClose { subscription.remove() }
+        awaitClose {
+            println("DEBUG_APP: Cerrando flujo")
+            subscription.remove()
+        }
     }
-
     fun getAssignmentsForCourse(courseId: String): Flow<List<Assignment>> = callbackFlow {
         val subscription = firestore.collection("assignments")
             .whereEqualTo("courseId", courseId)
-            .orderBy("dueDate", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)

@@ -1,7 +1,10 @@
 package com.example.teacherapp.presentation.fragment.assignment
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -20,24 +23,46 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AssignmentListFragment : Fragment(R.layout.fragment_assignment_list) {
+class AssignmentListFragment : Fragment() {
 
     private var _binding: FragmentAssignmentListBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: AssignmentViewModel by viewModels()
-    private val args: AssignmentListFragmentArgs by navArgs()
     private lateinit var adapter: AssignmentAdapter
+    private lateinit var courseId: String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        println("DEBUG_APP: AssignmentListFragment - onCreate")
+        println("DEBUG_APP: Arguments: ${arguments?.toString()}")
+
+        courseId = arguments?.getString("COURSE_ID")?.also { id ->
+            println("DEBUG_APP: CourseId obtenido: $id")
+        } ?: run {
+            println("DEBUG_APP: ERROR - CourseId es null")
+            Toast.makeText(context, "Error: Course ID not found", Toast.LENGTH_LONG).show()
+            return
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentAssignmentListBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentAssignmentListBinding.bind(view)
+        println("DEBUG_APP: AssignmentListFragment - onViewCreated con courseId: $courseId")
 
         setupRecyclerView()
         setupViews()
         observeStates()
-
-        viewModel.getAssignments(args.courseId)
+        viewModel.getAssignments(courseId)
     }
 
     private fun setupRecyclerView() {
@@ -60,43 +85,18 @@ class AssignmentListFragment : Fragment(R.layout.fragment_assignment_list) {
 
     private fun observeStates() {
         viewLifecycleOwner.lifecycleScope.launch {
-            launch {
-                viewModel.assignmentsState.collect { state ->
-                    when (state) {
-                        is AssignmentsState.Loading -> {
-                            binding.assignmentProgressBar.visibility = View.VISIBLE
-                        }
-                        is AssignmentsState.Success -> {
-                            binding.assignmentProgressBar.visibility = View.GONE
-                            adapter.submitList(state.assignments)
-                        }
-                        is AssignmentsState.Error -> {
-                            binding.assignmentProgressBar.visibility = View.GONE
-                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                        }
+            viewModel.assignmentsState.collect { state ->
+                when (state) {
+                    is AssignmentsState.Loading -> {
+                        binding.assignmentProgressBar.visibility = View.VISIBLE
                     }
-                }
-            }
-
-            launch {
-                viewModel.actionState.collect { state ->
-                    when (state) {
-                        is ActionState.Loading -> {
-                            binding.assignmentProgressBar.visibility = View.VISIBLE
-                        }
-                        is ActionState.Success -> {
-                            binding.assignmentProgressBar.visibility = View.GONE
-                            viewModel.getAssignments(args.courseId)
-                            viewModel.resetActionState()
-                        }
-                        is ActionState.Error -> {
-                            binding.assignmentProgressBar.visibility = View.GONE
-                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                            viewModel.resetActionState()
-                        }
-                        is ActionState.Idle -> {
-                            binding.assignmentProgressBar.visibility = View.GONE
-                        }
+                    is AssignmentsState.Success -> {
+                        binding.assignmentProgressBar.visibility = View.GONE
+                        adapter.submitList(state.assignments)
+                    }
+                    is AssignmentsState.Error -> {
+                        binding.assignmentProgressBar.visibility = View.GONE
+                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                     }
                 }
             }
@@ -104,7 +104,7 @@ class AssignmentListFragment : Fragment(R.layout.fragment_assignment_list) {
     }
 
     private fun showAddEditDialog(assignment: Assignment?) {
-        AddEditAssignmentDialog.newInstance(args.courseId, assignment)
+        AddEditAssignmentDialog.newInstance(courseId, assignment)
             .show(childFragmentManager, "assignment_dialog")
     }
 

@@ -7,4 +7,7 @@ data class Student(
     val birthDate: String = "",
     val phone: String = "",
     val email: String = ""
-)
+) {
+    // Constructor sin argumentos requerido por Firebase
+    constructor() : this("", "", "", "", "", "")
+}

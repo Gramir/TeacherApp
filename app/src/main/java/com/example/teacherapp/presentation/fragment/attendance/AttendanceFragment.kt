@@ -2,6 +2,7 @@ package com.example.teacherapp.presentation.fragment.attendance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.teacherapp.databinding.FragmentAttendanceBinding
 import com.example.teacherapp.presentation.adapter.AttendanceAdapter
@@ -20,6 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
+
 class AttendanceFragment : Fragment() {
 
     private var _binding: FragmentAttendanceBinding? = null
@@ -28,8 +31,22 @@ class AttendanceFragment : Fragment() {
     private val viewModel: AttendanceViewModel by viewModels()
     private lateinit var adapter: AttendanceAdapter
 
-    private var courseId: String? = null
+    private lateinit var courseId: String
     private var currentDate: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        println("DEBUG_APP: AttendanceFragment - onCreate")
+        println("DEBUG_APP: Arguments: ${arguments?.toString()}")
+
+        courseId = arguments?.getString("COURSE_ID")?.also { id ->
+            println("DEBUG_APP: CourseId obtenido: $id")
+        } ?: run {
+            println("DEBUG_APP: ERROR - CourseId es null")
+            Toast.makeText(context, "Error: Course ID not found", Toast.LENGTH_LONG).show()
+            return
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,13 +59,7 @@ class AttendanceFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Obtener argumentos
-        courseId = arguments?.getString("COURSE_ID")
-        if (courseId == null) {
-            Toast.makeText(context, "Error: Course ID not found", Toast.LENGTH_LONG).show()
-            return
-        }
+        println("DEBUG_APP: AttendanceFragment - onViewCreated con courseId: $courseId")
 
         setupRecyclerView()
         setupDatePicker()
@@ -78,10 +89,8 @@ class AttendanceFragment : Fragment() {
 
     private fun setupSaveButton() {
         binding.saveButton.setOnClickListener {
-            courseId?.let {
-                currentDate?.let {
-                    viewModel.saveAttendance(adapter.currentList)
-                }
+            currentDate?.let { date ->
+                viewModel.saveAttendance(adapter.currentList)
             }
         }
     }
@@ -123,10 +132,9 @@ class AttendanceFragment : Fragment() {
             currentDate = String.format("%04d-%02d-%02d", year, month + 1, day)
             binding.dateEditText.setText(currentDate)
 
-            courseId?.let { cid ->
-                currentDate?.let { date ->
-                    viewModel.getStudentsWithAttendanceForCourseAndDate(cid, date)
-                }
+            currentDate?.let { date ->
+                println("DEBUG_APP: AttendanceFragment - Buscando asistencia para curso: $courseId, fecha: $date")
+                viewModel.getStudentsWithAttendanceForCourseAndDate(courseId, date)
             }
         }
         datePickerFragment.show(childFragmentManager, "datePicker")
@@ -135,9 +143,5 @@ class AttendanceFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    companion object {
-       // private const val TAG = "AttendanceFragment"
     }
 }

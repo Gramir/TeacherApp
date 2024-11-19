@@ -5,10 +5,10 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.teacherapp.data.datasource.remote.firebase.SessionManager
 import com.example.teacherapp.databinding.ActivityLoginBinding
 import com.example.teacherapp.presentation.viewmodel.login.LoginState
 import com.example.teacherapp.presentation.viewmodel.login.LoginViewModel
-import com.example.teacherapp.util.TestDataInserter
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -21,45 +21,23 @@ class LoginActivity : AppCompatActivity() {
     private val viewModel: LoginViewModel by viewModels()
 
     @Inject
-    lateinit var testDataInserter: TestDataInserter
+    lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Verificar si ya hay sesión activa
+        if (sessionManager.isLoggedIn()) {
+            navigateToMain(sessionManager.getCurrentUserId() ?: return)
+            finish()
+            return
+        }
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Solo se ejecuta una vez
-           // insertTestDataIfNeeded()
-
         setupViews()
         observeState()
-    }
-
-    private fun insertTestDataIfNeeded() {
-        val sharedPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        val testDataInserted = sharedPrefs.getBoolean("test_data_inserted", false)
-
-        if (!testDataInserted) {
-            lifecycleScope.launch {
-                try {
-                    testDataInserter.insertTestData()
-                    sharedPrefs.edit().putBoolean("test_data_inserted", true).apply()
-
-
-                    Snackbar.make(
-                        binding.root,
-                        "Datos de prueba creados exitosamente",
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                } catch (e: Exception) {
-                    Snackbar.make(
-                        binding.root,
-                        "Error al crear datos de prueba: ${e.message}",
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
     }
 
     private fun setupViews() {
@@ -104,6 +82,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun navigateToMain(teacherId: String) {
         val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("TEACHER_ID", teacherId)
         }
         startActivity(intent)

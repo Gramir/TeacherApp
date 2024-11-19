@@ -31,37 +31,12 @@ class AttendanceViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = AttendanceUiState.Loading
             try {
-                Log.d(TAG, "Fetching attendances for course $courseId on date $date")
                 getAttendanceUseCase(courseId, date).collect { attendanceList ->
-                    Log.d(TAG, "Retrieved ${attendanceList.size} attendances")
-                    _attendances.value = attendanceList.map { it.toAttendanceWithStudent() }
+                    _attendances.value = attendanceList
                     _uiState.value = AttendanceUiState.Success
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error in getStudentsWithAttendanceForCourseAndDate", e)
-                _uiState.value = AttendanceUiState.Error(e.message ?: "Unknown error")
-            }
-        }
-    }
-
-    fun saveAttendance(attendanceList: List<AttendanceWithStudent>) {
-        viewModelScope.launch {
-            _uiState.value = AttendanceUiState.Loading
-            try {
-                val result = saveAttendanceUseCase(attendanceList.map { it.toAttendance() })
-                result.fold(
-                    onSuccess = {
-                        Log.d(TAG, "Attendance saved successfully")
-                        _uiState.value = AttendanceUiState.Success
-                    },
-                    onFailure = { error ->
-                        Log.e(TAG, "Error saving attendance", error)
-                        _uiState.value = AttendanceUiState.Error(error.message ?: "Unknown error")
-                    }
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in saveAttendance", e)
-                _uiState.value = AttendanceUiState.Error(e.message ?: "Unknown error")
+                _uiState.value = AttendanceUiState.Error(e.message ?: "Error desconocido")
             }
         }
     }
@@ -72,6 +47,23 @@ class AttendanceViewModel @Inject constructor(
         if (index != -1) {
             currentList[index] = currentList[index].copy(present = isPresent)
             _attendances.value = currentList
+        }
+    }
+
+    fun saveAttendance(attendanceList: List<AttendanceWithStudent>) {
+        viewModelScope.launch {
+            _uiState.value = AttendanceUiState.Loading
+            try {
+                val result = saveAttendanceUseCase(attendanceList)
+                result.fold(
+                    onSuccess = { _uiState.value = AttendanceUiState.Success },
+                    onFailure = { error ->
+                        _uiState.value = AttendanceUiState.Error(error.message ?: "Error al guardar")
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.value = AttendanceUiState.Error(e.message ?: "Error desconocido")
+            }
         }
     }
 }

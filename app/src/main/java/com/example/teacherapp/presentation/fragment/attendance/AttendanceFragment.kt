@@ -20,9 +20,10 @@ import com.example.teacherapp.presentation.viewmodel.attendance.AttendanceViewMo
 import com.example.teacherapp.util.DatePickerFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @AndroidEntryPoint
-
 class AttendanceFragment : Fragment() {
 
     private var _binding: FragmentAttendanceBinding? = null
@@ -30,9 +31,10 @@ class AttendanceFragment : Fragment() {
 
     private val viewModel: AttendanceViewModel by viewModels()
     private lateinit var adapter: AttendanceAdapter
-
     private lateinit var courseId: String
-    private var currentDate: String? = null
+
+    // Inicializar con la fecha actual
+    private var currentDate: String = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,16 +61,24 @@ class AttendanceFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        println("DEBUG_APP: AttendanceFragment - onViewCreated con courseId: $courseId")
+        println("DEBUG_APP: AttendanceFragment - onViewCreated")
+        println("DEBUG_APP: CourseId: $courseId")
+        println("DEBUG_APP: Fecha inicial: $currentDate")
 
         setupRecyclerView()
         setupDatePicker()
         observeAttendances()
         setupSaveButton()
+
+        // Cargar datos iniciales con la fecha actual
+        binding.dateEditText.setText(currentDate)
+        loadAttendanceData()
     }
 
     private fun setupRecyclerView() {
+        println("DEBUG_APP: Configurando RecyclerView")
         adapter = AttendanceAdapter { studentId, isPresent ->
+            println("DEBUG_APP: Actualizando asistencia - estudiante: $studentId, presente: $isPresent")
             viewModel.updateAttendanceStatus(studentId, isPresent)
         }
 
@@ -87,17 +97,32 @@ class AttendanceFragment : Fragment() {
         }
     }
 
+    private fun loadAttendanceData() {
+        println("DEBUG_APP: Cargando asistencia - courseId: $courseId, fecha: $currentDate")
+        viewModel.getStudentsWithAttendanceForCourseAndDate(courseId, currentDate)
+    }
+
+    @SuppressLint("DefaultLocale")
+    private fun showDatePickerDialog() {
+        val datePickerFragment = DatePickerFragment { day, month, year ->
+            currentDate = String.format("%04d-%02d-%02d", year, month + 1, day)
+            binding.dateEditText.setText(currentDate)
+            loadAttendanceData()
+        }
+        datePickerFragment.show(childFragmentManager, "datePicker")
+    }
+
     private fun setupSaveButton() {
         binding.saveButton.setOnClickListener {
-            currentDate?.let { date ->
-                viewModel.saveAttendance(adapter.currentList)
-            }
+            println("DEBUG_APP: Guardando asistencia - courseId: $courseId, fecha: $currentDate")
+            viewModel.saveAttendance(adapter.currentList)
         }
     }
 
     private fun observeAttendances() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.attendances.collect { attendances ->
+                println("DEBUG_APP: Recibidos ${attendances.size} registros de asistencia")
                 adapter.submitList(attendances)
             }
         }
@@ -114,30 +139,19 @@ class AttendanceFragment : Fragment() {
 
         when (state) {
             is AttendanceUiState.Success -> {
+                println("DEBUG_APP: Estado Success")
                 binding.saveButton.isEnabled = true
             }
             is AttendanceUiState.Error -> {
+                println("DEBUG_APP: Estado Error: ${state.message}")
                 binding.saveButton.isEnabled = true
                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
             }
             is AttendanceUiState.Loading -> {
+                println("DEBUG_APP: Estado Loading")
                 binding.saveButton.isEnabled = false
             }
         }
-    }
-
-    @SuppressLint("DefaultLocale")
-    private fun showDatePickerDialog() {
-        val datePickerFragment = DatePickerFragment { day, month, year ->
-            currentDate = String.format("%04d-%02d-%02d", year, month + 1, day)
-            binding.dateEditText.setText(currentDate)
-
-            currentDate?.let { date ->
-                println("DEBUG_APP: AttendanceFragment - Buscando asistencia para curso: $courseId, fecha: $date")
-                viewModel.getStudentsWithAttendanceForCourseAndDate(courseId, date)
-            }
-        }
-        datePickerFragment.show(childFragmentManager, "datePicker")
     }
 
     override fun onDestroyView() {

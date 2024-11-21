@@ -6,7 +6,7 @@
     <fragment
         android:id="@+id/courseListFragment"
         android:name="com.example.teacherapp.presentation.fragment.course.CourseListFragment"
-        android:label="Courses">
+        android:label="Cursos">
 
         <action
             android:id="@+id/action_courseList_to_assignments"
@@ -36,7 +36,7 @@
     <fragment
         android:id="@+id/assignmentListFragment"
         android:name="com.example.teacherapp.presentation.fragment.assignment.AssignmentListFragment"
-        android:label="Assignments">
+        android:label="Tareas">
 
         <argument
             android:name="courseId"
@@ -46,7 +46,7 @@
     <fragment
         android:id="@+id/attendanceFragment"
         android:name="com.example.teacherapp.presentation.fragment.attendance.AttendanceFragment"
-        android:label="Attendance">
+        android:label="Asistencia">
 
         <argument
             android:name="courseId"
@@ -56,7 +56,7 @@
     <fragment
         android:id="@+id/studentListFragment"
         android:name="com.example.teacherapp.presentation.fragment.student.StudentListFragment"
-        android:label="Students">
+        android:label="Estudiantes">
 
         <argument
             android:name="courseId"

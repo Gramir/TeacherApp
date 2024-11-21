@@ -18,43 +18,53 @@ class AssignmentViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _assignmentsState = MutableStateFlow<AssignmentsState>(AssignmentsState.Loading)
-    val assignmentsState: StateFlow<AssignmentsState> = _assignmentsState
+    val assignmentsState: StateFlow<AssignmentsState> = _assignmentsState.asStateFlow()
 
     private val _actionState = MutableStateFlow<ActionState>(ActionState.Idle)
-    val actionState: StateFlow<ActionState> = _actionState
+    val actionState: StateFlow<ActionState> = _actionState.asStateFlow()
 
     private val _selectedAssignment = MutableStateFlow<Assignment?>(null)
-    val selectedAssignment: StateFlow<Assignment?> = _selectedAssignment
+    val selectedAssignment: StateFlow<Assignment?> = _selectedAssignment.asStateFlow()
 
-    private val assignmentsList = mutableListOf<Assignment>()
+    private val assignments = mutableListOf<Assignment>()
 
     fun getAssignments(courseId: String) {
         viewModelScope.launch {
             _assignmentsState.value = AssignmentsState.Loading
             try {
-                getAssignmentsUseCase(courseId).collect { assignments ->
-                    assignmentsList.clear()
-                    assignmentsList.addAll(assignments)
-                    _assignmentsState.value = AssignmentsState.Success(assignments)
+                getAssignmentsUseCase(courseId).collect { newAssignments ->
+                    assignments.clear()
+                    assignments.addAll(newAssignments)
+                    _assignmentsState.value = AssignmentsState.Success(newAssignments)
                 }
             } catch (e: Exception) {
-                _assignmentsState.value = AssignmentsState.Error(e.message ?: "Unknown error")
+                _assignmentsState.value = AssignmentsState.Error(e.message ?: "Error desconocido")
             }
         }
     }
 
     fun getAssignment(assignmentId: String) {
-        _selectedAssignment.value = assignmentsList.find { it.id == assignmentId }
+        println("DEBUG: Buscando assignment con ID: $assignmentId")
+        println("DEBUG: Assignments disponibles: ${assignments.size}")
+        viewModelScope.launch {
+            val assignment = assignments.find { it.id == assignmentId }
+            println("DEBUG: Assignment encontrado: $assignment")
+            _selectedAssignment.value = assignment
+        }
     }
 
     fun createAssignment(assignment: Assignment) {
         viewModelScope.launch {
             _actionState.value = ActionState.Loading
             try {
-                createAssignmentUseCase(assignment)
-                _actionState.value = ActionState.Success
+                createAssignmentUseCase(assignment).onSuccess {
+                    _actionState.value = ActionState.Success
+                    getAssignments(assignment.courseId)
+                }.onFailure { error ->
+                    _actionState.value = ActionState.Error(error.message ?: "Error al crear la tarea")
+                }
             } catch (e: Exception) {
-                _actionState.value = ActionState.Error(e.message ?: "Unknown error")
+                _actionState.value = ActionState.Error(e.message ?: "Error desconocido")
             }
         }
     }
@@ -63,10 +73,14 @@ class AssignmentViewModel @Inject constructor(
         viewModelScope.launch {
             _actionState.value = ActionState.Loading
             try {
-                updateAssignmentUseCase(assignment)
-                _actionState.value = ActionState.Success
+                updateAssignmentUseCase(assignment).onSuccess {
+                    _actionState.value = ActionState.Success
+                    getAssignments(assignment.courseId)
+                }.onFailure { error ->
+                    _actionState.value = ActionState.Error(error.message ?: "Error al actualizar la tarea")
+                }
             } catch (e: Exception) {
-                _actionState.value = ActionState.Error(e.message ?: "Unknown error")
+                _actionState.value = ActionState.Error(e.message ?: "Error desconocido")
             }
         }
     }
@@ -75,15 +89,21 @@ class AssignmentViewModel @Inject constructor(
         viewModelScope.launch {
             _actionState.value = ActionState.Loading
             try {
-                deleteAssignmentUseCase(assignmentId)
-                _actionState.value = ActionState.Success
+                deleteAssignmentUseCase(assignmentId).onSuccess {
+                    _actionState.value = ActionState.Success
+                    val courseId = assignments.find { it.id == assignmentId }?.courseId
+                    courseId?.let { getAssignments(it) }
+                }.onFailure { error ->
+                    _actionState.value = ActionState.Error(error.message ?: "Error al eliminar la tarea")
+                }
             } catch (e: Exception) {
-                _actionState.value = ActionState.Error(e.message ?: "Unknown error")
+                _actionState.value = ActionState.Error(e.message ?: "Error desconocido")
             }
         }
     }
 
     fun clearSelectedAssignment() {
+        println("DEBUG: Limpiando assignment seleccionado")
         _selectedAssignment.value = null
     }
 

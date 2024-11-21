@@ -1,5 +1,6 @@
 package com.example.teacherapp.domain.model
 
+
 data class Assignment(
     val id: String = "",
     val title: String = "",

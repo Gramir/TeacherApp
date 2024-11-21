@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#121212">  <!-- Color de fondo oscuro -->
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -13,30 +13,39 @@
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" />
+        app:navigationIcon="@drawable/ic_close"
+        app:titleTextColor="@color/white" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="#121212">  <!-- Color de fondo oscuro -->
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:background="#121212">  <!-- Color de fondo oscuro -->
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/titleTextInputLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title">
+                android:hint="@string/assignment_title"
+                app:boxBackgroundColor="#2C2C2C"
+                app:boxStrokeColor="@color/stroke_color_dark"
+                app:hintTextColor="@color/text_hint_dark">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/titleEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="@color/white" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -46,14 +55,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Description">
+                android:hint="@string/assignment_description"
+                app:boxBackgroundColor="#2C2C2C"
+                app:boxStrokeColor="@color/stroke_color_dark"
+                app:hintTextColor="@color/text_hint_dark">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/descriptionEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="top"
                     android:inputType="textMultiLine"
-                    android:minLines="3" />
+                    android:lines="4"
+                    android:textColor="@color/white" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -63,14 +77,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Due Date">
+                android:hint="@string/due_date"
+                app:boxBackgroundColor="#2C2C2C"
+                app:boxStrokeColor="@color/stroke_color_dark"
+                app:hintTextColor="@color/text_hint_dark"
+                app:endIconDrawable="@drawable/ic_calendar"
+                app:endIconMode="custom"
+                app:endIconTint="@color/white">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/dueDateEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:textColor="@color/white" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -80,14 +101,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Status">
+                android:hint="@string/assignment_status"
+                app:boxBackgroundColor="#2C2C2C"
+                app:boxStrokeColor="@color/stroke_color_dark"
+                app:hintTextColor="@color/text_hint_dark">
 
                 <AutoCompleteTextView
                     android:id="@+id/statusAutoComplete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
-                    tools:ignore="LabelFor" />
+                    android:textColor="@color/white" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

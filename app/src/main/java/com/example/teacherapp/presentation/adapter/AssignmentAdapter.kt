@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.teacherapp.R
 import com.example.teacherapp.databinding.ItemAssignmentBinding
 import com.example.teacherapp.domain.model.Assignment
 
@@ -34,8 +35,22 @@ class AssignmentAdapter(
             binding.apply {
                 titleText.text = assignment.title
                 descriptionText.text = assignment.description
-                dueDateText.text = assignment.dueDate
+                dueDateText.text = root.context.getString(R.string.due_date_format, assignment.dueDate)
                 statusText.text = assignment.status
+
+                // Establecer color según el estado
+                val statusColor = when (assignment.status.lowercase()) {
+                    "pendiente" -> "#FFA000"
+                    "en progreso" -> "#1976D2"
+                    "completado" -> "#388E3C"
+                    else -> "#757575"
+                }
+                statusText.setBackgroundColor(android.graphics.Color.parseColor(statusColor))
+                statusText.setTextColor(android.graphics.Color.WHITE)
+
+                // Configurar botones
+                editButton.setText(R.string.edit)
+                deleteButton.setText(R.string.delete)
 
                 editButton.setOnClickListener { onEditClick(assignment) }
                 deleteButton.setOnClickListener { onDeleteClick(assignment) }

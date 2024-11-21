@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.navArgs
 import com.example.teacherapp.R
 import com.example.teacherapp.databinding.FragmentAssignmentListBinding
 import com.example.teacherapp.domain.model.Assignment
@@ -34,14 +33,8 @@ class AssignmentListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        println("DEBUG_APP: AssignmentListFragment - onCreate")
-        println("DEBUG_APP: Arguments: ${arguments?.toString()}")
-
-        courseId = arguments?.getString("COURSE_ID")?.also { id ->
-            println("DEBUG_APP: CourseId obtenido: $id")
-        } ?: run {
-            println("DEBUG_APP: ERROR - CourseId es null")
-            Toast.makeText(context, "Error: Course ID not found", Toast.LENGTH_LONG).show()
+        courseId = arguments?.getString("COURSE_ID") ?: run {
+            Toast.makeText(context, "Error: No se encontró el ID del curso", Toast.LENGTH_LONG).show()
             return
         }
     }
@@ -57,8 +50,6 @@ class AssignmentListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        println("DEBUG_APP: AssignmentListFragment - onViewCreated con courseId: $courseId")
-
         setupRecyclerView()
         setupViews()
         observeStates()
@@ -68,6 +59,8 @@ class AssignmentListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = AssignmentAdapter(
             onEditClick = { assignment ->
+                println("DEBUG: Click en editar assignment: $assignment")
+                viewModel.clearSelectedAssignment() // Limpiamos cualquier selección previa
                 showAddEditDialog(assignment)
             },
             onDeleteClick = { assignment ->
@@ -79,6 +72,7 @@ class AssignmentListFragment : Fragment() {
 
     private fun setupViews() {
         binding.addAssignmentButton.setOnClickListener {
+            viewModel.clearSelectedAssignment() // Limpiar la selección antes de crear uno nuevo
             showAddEditDialog(null)
         }
     }
@@ -101,21 +95,38 @@ class AssignmentListFragment : Fragment() {
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.actionState.collect { state ->
+                when (state) {
+                    is ActionState.Success -> {
+                        viewModel.resetActionState()
+                        // La lista se actualizará automáticamente gracias al Flow
+                    }
+                    is ActionState.Error -> {
+                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                        viewModel.resetActionState()
+                    }
+                    else -> {}
+                }
+            }
+        }
     }
 
     private fun showAddEditDialog(assignment: Assignment?) {
+        println("DEBUG: Mostrando diálogo para assignment: $assignment")
         AddEditAssignmentDialog.newInstance(courseId, assignment)
             .show(childFragmentManager, "assignment_dialog")
     }
 
     private fun showDeleteConfirmation(assignment: Assignment) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Delete Assignment")
-            .setMessage("Are you sure you want to delete this assignment?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setTitle(R.string.confirm_delete_title)
+            .setMessage(R.string.confirm_delete_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
                 viewModel.deleteAssignment(assignment.id)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

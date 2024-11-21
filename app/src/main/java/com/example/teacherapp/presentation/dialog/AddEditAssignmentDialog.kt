@@ -11,8 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import com.example.teacherapp.R
 import com.example.teacherapp.databinding.DialogAddEditAssignmentBinding
 import com.example.teacherapp.domain.model.Assignment
-import com.example.teacherapp.presentation.viewmodel.assigment.AssignmentViewModel
 import com.example.teacherapp.presentation.viewmodel.assigment.ActionState
+import com.example.teacherapp.presentation.viewmodel.assigment.AssignmentViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,15 +28,15 @@ class AddEditAssignmentDialog : DialogFragment() {
 
     private val viewModel: AssignmentViewModel by activityViewModels()
     private lateinit var courseId: String
-    private var assignmentId: String? = null
+    private var assignment: Assignment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.FullScreenDialog)
-        courseId = arguments?.getString("courseId") ?: ""
-        assignmentId = arguments?.getString("assignmentId")
-        // Log para depuración
-        println("DEBUG: onCreate Dialog - courseId: $courseId, assignmentId: $assignmentId")
+        courseId = arguments?.getString(ARG_COURSE_ID) ?: ""
+        assignment = arguments?.getParcelable(ARG_ASSIGNMENT)
+        println("DEBUG_DIALOG: onCreate - courseId: $courseId")
+        println("DEBUG_DIALOG: assignment recibido: $assignment")
     }
 
     override fun onCreateView(
@@ -50,23 +50,66 @@ class AddEditAssignmentDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        println("DEBUG_DIALOG: onViewCreated iniciado")
         setupViews()
         setupSpinner()
 
-        assignmentId?.let { id ->
-            viewLifecycleOwner.lifecycleScope.launch {
-                kotlinx.coroutines.delay(100) // Pequeño retraso para asegurar que los datos estén disponibles
-                viewModel.getAssignment(id)
-            }
+        // Si tenemos una tarea, llenar los campos directamente
+        assignment?.let { assignment ->
+            println("DEBUG_DIALOG: Llenando campos con tarea: ${assignment.title}")
+            updateFormFields(assignment)
         }
 
-        observeStates()
+        // Observar el estado de las acciones
+        observeActionState()
+    }
+
+    private fun observeActionState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.actionState.collect { state ->
+                when (state) {
+                    is ActionState.Success -> {
+                        Snackbar.make(
+                            binding.root,
+                            if (assignment == null) R.string.assignment_saved else R.string.assignment_updated,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        dismiss()
+                    }
+                    is ActionState.Error -> {
+                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                    }
+                    else -> {
+                        // No hacer nada para otros estados
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateFormFields(assignment: Assignment) {
+        println("DEBUG_DIALOG: Actualizando campos del formulario")
+        println("DEBUG_DIALOG: Título: ${assignment.title}")
+        println("DEBUG_DIALOG: Descripción: ${assignment.description}")
+        println("DEBUG_DIALOG: Fecha: ${assignment.dueDate}")
+        println("DEBUG_DIALOG: Estado: ${assignment.status}")
+
+        binding.apply {
+            titleEditText.setText(assignment.title)
+            descriptionEditText.setText(assignment.description)
+            dueDateEditText.setText(assignment.dueDate)
+            statusAutoComplete.setText(assignment.status, false)
+        }
     }
 
     private fun setupViews() {
         binding.toolbar.apply {
             setNavigationOnClickListener { dismiss() }
-            title = if (assignmentId == null) "Agregar Tarea" else "Editar Tarea"
+            title = if (assignment == null)
+                getString(R.string.add_assignment)
+            else
+                getString(R.string.edit_assignment)
+
             inflateMenu(R.menu.menu_add_edit_assignment)
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
@@ -85,53 +128,48 @@ class AddEditAssignmentDialog : DialogFragment() {
     }
 
     private fun setupSpinner() {
-        val statusArray = arrayOf("Pendiente", "En Progreso", "Completado")
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
-            statusArray
+            resources.getStringArray(R.array.assignment_status_options)
         )
         binding.statusAutoComplete.setAdapter(adapter)
     }
 
-    private fun observeStates() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.selectedAssignment.collect { assignment ->
-                    println("DEBUG: Assignment recibido: $assignment")
-                    assignment?.let {
-                        println("DEBUG: Actualizando campos con assignment: $it")
-                        binding.titleEditText.setText(it.title)
-                        binding.descriptionEditText.setText(it.description)
-                        binding.dueDateEditText.setText(it.dueDate)
-                        binding.statusAutoComplete.setText(it.status, false)
-                    }
-                }
-            }
-            viewModel.actionState.collect { state ->
-                when (state) {
-                    is ActionState.Success -> {
-                        Snackbar.make(
-                            binding.root,
-                            if (assignmentId == null) "Tarea creada" else "Tarea actualizada",
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                        dismiss()
-                    }
-                    is ActionState.Error -> {
-                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                    }
-                    else -> {
-                        // Handle other states if needed
-                    }
-                }
-            }
+    private fun saveAssignment() {
+        val title = binding.titleEditText.text.toString()
+        val description = binding.descriptionEditText.text.toString()
+        val dueDate = binding.dueDateEditText.text.toString()
+        val status = binding.statusAutoComplete.text.toString()
+
+        if (title.isBlank() || dueDate.isBlank()) {
+            if (title.isBlank())
+                binding.titleTextInputLayout.error = getString(R.string.error_title_required)
+            if (dueDate.isBlank())
+                binding.dueDateTextInputLayout.error = getString(R.string.error_date_required)
+            return
+        }
+
+        val updatedAssignment = Assignment(
+            id = assignment?.id ?: "",
+            title = title,
+            description = description,
+            dueDate = dueDate,
+            courseId = courseId,
+            status = status,
+            createdAt = assignment?.createdAt ?: System.currentTimeMillis()
+        )
+
+        if (assignment == null) {
+            viewModel.createAssignment(updatedAssignment)
+        } else {
+            viewModel.updateAssignment(updatedAssignment)
         }
     }
 
     private fun showDatePicker() {
         val datePicker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("Seleccionar Fecha de Entrega")
+            .setTitleText(getString(R.string.due_date))
             .build()
 
         datePicker.addOnPositiveButtonClickListener { selection ->
@@ -142,47 +180,21 @@ class AddEditAssignmentDialog : DialogFragment() {
         datePicker.show(childFragmentManager, "date_picker")
     }
 
-    private fun saveAssignment() {
-        val title = binding.titleEditText.text.toString()
-        val description = binding.descriptionEditText.text.toString()
-        val dueDate = binding.dueDateEditText.text.toString()
-        val status = binding.statusAutoComplete.text.toString()
-
-        if (title.isBlank() || dueDate.isBlank()) {
-            if (title.isBlank()) binding.titleTextInputLayout.error = "El título es requerido"
-            if (dueDate.isBlank()) binding.dueDateTextInputLayout.error = "La fecha de entrega es requerida"
-            return
-        }
-
-        val assignment = Assignment(
-            id = assignmentId ?: UUID.randomUUID().toString(),
-            title = title,
-            description = description,
-            dueDate = dueDate,
-            courseId = courseId,
-            status = status,
-            createdAt = System.currentTimeMillis()
-        )
-
-        if (assignmentId == null) {
-            viewModel.createAssignment(assignment)
-        } else {
-            viewModel.updateAssignment(assignment)
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
     companion object {
+        private const val ARG_COURSE_ID = "courseId"
+        private const val ARG_ASSIGNMENT = "assignment"
+
         fun newInstance(courseId: String, assignment: Assignment? = null): AddEditAssignmentDialog {
             println("DEBUG: Creando nuevo dialog - courseId: $courseId, assignment: $assignment")
             return AddEditAssignmentDialog().apply {
                 arguments = Bundle().apply {
-                    putString("courseId", courseId)
-                    putString("assignmentId", assignment?.id)
+                    putString(ARG_COURSE_ID, courseId)
+                    putParcelable(ARG_ASSIGNMENT, assignment)
                 }
             }
         }

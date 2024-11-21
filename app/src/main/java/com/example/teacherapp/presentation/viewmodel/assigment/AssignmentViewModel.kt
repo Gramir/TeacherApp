@@ -26,46 +26,68 @@ class AssignmentViewModel @Inject constructor(
     private val _selectedAssignment = MutableStateFlow<Assignment?>(null)
     val selectedAssignment: StateFlow<Assignment?> = _selectedAssignment.asStateFlow()
 
-    private val assignments = mutableListOf<Assignment>()
+    // StateFlow para mantener la lista de tareas
+    private val _assignments = MutableStateFlow<List<Assignment>>(emptyList())
+
+    init {
+        println("DEBUG_VM: ViewModel inicializado")
+    }
 
     fun getAssignments(courseId: String) {
         viewModelScope.launch {
+            println("DEBUG_VM: Iniciando obtención de tareas para curso: $courseId")
             _assignmentsState.value = AssignmentsState.Loading
+
             try {
                 getAssignmentsUseCase(courseId).collect { newAssignments ->
-                    assignments.clear()
-                    assignments.addAll(newAssignments)
+                    println("DEBUG_VM: Recibidas ${newAssignments.size} tareas")
+                    newAssignments.forEach { assignment ->
+                        println("DEBUG_VM: Tarea recibida - ID: ${assignment.id}, Título: ${assignment.title}")
+                    }
+
+                    _assignments.value = newAssignments
                     _assignmentsState.value = AssignmentsState.Success(newAssignments)
                 }
             } catch (e: Exception) {
+                println("DEBUG_VM: Error al obtener tareas: ${e.message}")
                 _assignmentsState.value = AssignmentsState.Error(e.message ?: "Error desconocido")
             }
         }
     }
 
     fun getAssignment(assignmentId: String) {
-        println("DEBUG: Buscando assignment con ID: $assignmentId")
-        println("DEBUG: Assignments disponibles: ${assignments.size}")
-        viewModelScope.launch {
-            val assignment = assignments.find { it.id == assignmentId }
-            println("DEBUG: Assignment encontrado: $assignment")
-            _selectedAssignment.value = assignment
-        }
-    }
+        println("DEBUG_VM: Buscando tarea con ID: $assignmentId")
+        val currentAssignments = _assignments.value
+        println("DEBUG_VM: Tareas en memoria: ${currentAssignments.size}")
 
-    fun createAssignment(assignment: Assignment) {
-        viewModelScope.launch {
-            _actionState.value = ActionState.Loading
-            try {
-                createAssignmentUseCase(assignment).onSuccess {
-                    _actionState.value = ActionState.Success
-                    getAssignments(assignment.courseId)
-                }.onFailure { error ->
-                    _actionState.value = ActionState.Error(error.message ?: "Error al crear la tarea")
+        if (currentAssignments.isEmpty()) {
+            println("DEBUG_VM: No hay tareas en memoria, recargando...")
+            // Si no hay tareas en memoria, volvemos a cargarlas
+            viewModelScope.launch {
+                getAssignmentsUseCase(assignmentId.substringBefore('_')).collect { assignments ->
+                    println("DEBUG_VM: Tareas recargadas: ${assignments.size}")
+                    _assignments.value = assignments
+                    val found = assignments.find { it.id == assignmentId }
+                    println("DEBUG_VM: Tarea encontrada después de recargar: $found")
+                    _selectedAssignment.value = found
                 }
-            } catch (e: Exception) {
-                _actionState.value = ActionState.Error(e.message ?: "Error desconocido")
             }
+            return
+        }
+
+        // Si hay tareas en memoria, buscar normalmente
+        currentAssignments.forEach { assignment ->
+            println("DEBUG_VM: Verificando tarea en memoria - ID: ${assignment.id}, Título: ${assignment.title}")
+        }
+
+        val assignment = currentAssignments.find { it.id == assignmentId }
+        println("DEBUG_VM: Tarea encontrada: $assignment")
+
+        if (assignment != null) {
+            println("DEBUG_VM: Estableciendo tarea seleccionada")
+            _selectedAssignment.value = assignment
+        } else {
+            println("DEBUG_VM: No se encontró la tarea $assignmentId")
         }
     }
 
@@ -74,10 +96,35 @@ class AssignmentViewModel @Inject constructor(
             _actionState.value = ActionState.Loading
             try {
                 updateAssignmentUseCase(assignment).onSuccess {
+                    // Actualizar la lista en memoria
+                    val currentList = _assignments.value.toMutableList()
+                    val index = currentList.indexOfFirst { it.id == assignment.id }
+                    if (index != -1) {
+                        currentList[index] = assignment
+                        _assignments.value = currentList
+                    }
                     _actionState.value = ActionState.Success
-                    getAssignments(assignment.courseId)
                 }.onFailure { error ->
                     _actionState.value = ActionState.Error(error.message ?: "Error al actualizar la tarea")
+                }
+            } catch (e: Exception) {
+                _actionState.value = ActionState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun createAssignment(assignment: Assignment) {
+        viewModelScope.launch {
+            _actionState.value = ActionState.Loading
+            try {
+                createAssignmentUseCase(assignment).onSuccess {
+                    // Agregar a la lista en memoria
+                    val currentList = _assignments.value.toMutableList()
+                    currentList.add(assignment)
+                    _assignments.value = currentList
+                    _actionState.value = ActionState.Success
+                }.onFailure { error ->
+                    _actionState.value = ActionState.Error(error.message ?: "Error al crear la tarea")
                 }
             } catch (e: Exception) {
                 _actionState.value = ActionState.Error(e.message ?: "Error desconocido")
@@ -90,9 +137,11 @@ class AssignmentViewModel @Inject constructor(
             _actionState.value = ActionState.Loading
             try {
                 deleteAssignmentUseCase(assignmentId).onSuccess {
+                    // Eliminar de la lista en memoria
+                    val currentList = _assignments.value.toMutableList()
+                    currentList.removeAll { it.id == assignmentId }
+                    _assignments.value = currentList
                     _actionState.value = ActionState.Success
-                    val courseId = assignments.find { it.id == assignmentId }?.courseId
-                    courseId?.let { getAssignments(it) }
                 }.onFailure { error ->
                     _actionState.value = ActionState.Error(error.message ?: "Error al eliminar la tarea")
                 }
@@ -103,7 +152,6 @@ class AssignmentViewModel @Inject constructor(
     }
 
     fun clearSelectedAssignment() {
-        println("DEBUG: Limpiando assignment seleccionado")
         _selectedAssignment.value = null
     }
 

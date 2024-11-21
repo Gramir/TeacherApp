@@ -53,14 +53,18 @@ class AssignmentListFragment : Fragment() {
         setupRecyclerView()
         setupViews()
         observeStates()
+        loadAssignments()
+    }
+
+    private fun loadAssignments() {
+        println("DEBUG_FRAGMENT: Cargando tareas para curso: $courseId")
         viewModel.getAssignments(courseId)
     }
 
     private fun setupRecyclerView() {
         adapter = AssignmentAdapter(
             onEditClick = { assignment ->
-                println("DEBUG: Click en editar assignment: $assignment")
-                viewModel.clearSelectedAssignment() // Limpiamos cualquier selección previa
+                println("DEBUG_FRAGMENT: Click en editar tarea: $assignment")
                 showAddEditDialog(assignment)
             },
             onDeleteClick = { assignment ->
@@ -72,9 +76,25 @@ class AssignmentListFragment : Fragment() {
 
     private fun setupViews() {
         binding.addAssignmentButton.setOnClickListener {
-            viewModel.clearSelectedAssignment() // Limpiar la selección antes de crear uno nuevo
             showAddEditDialog(null)
         }
+    }
+
+    private fun showAddEditDialog(assignment: Assignment?) {
+        println("DEBUG_FRAGMENT: Mostrando diálogo para tarea: $assignment")
+        AddEditAssignmentDialog.newInstance(courseId, assignment)
+            .show(childFragmentManager, "assignment_dialog")
+    }
+
+    private fun showDeleteConfirmation(assignment: Assignment) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.confirm_delete_title)
+            .setMessage(R.string.confirm_delete_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                viewModel.deleteAssignment(assignment.id)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun observeStates() {
@@ -100,8 +120,9 @@ class AssignmentListFragment : Fragment() {
             viewModel.actionState.collect { state ->
                 when (state) {
                     is ActionState.Success -> {
+                        // Recargar la lista después de una acción exitosa
+                        loadAssignments()
                         viewModel.resetActionState()
-                        // La lista se actualizará automáticamente gracias al Flow
                     }
                     is ActionState.Error -> {
                         Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
@@ -113,25 +134,12 @@ class AssignmentListFragment : Fragment() {
         }
     }
 
-    private fun showAddEditDialog(assignment: Assignment?) {
-        println("DEBUG: Mostrando diálogo para assignment: $assignment")
-        AddEditAssignmentDialog.newInstance(courseId, assignment)
-            .show(childFragmentManager, "assignment_dialog")
-    }
-
-    private fun showDeleteConfirmation(assignment: Assignment) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.confirm_delete_title)
-            .setMessage(R.string.confirm_delete_message)
-            .setPositiveButton(R.string.delete) { _, _ ->
-                viewModel.deleteAssignment(assignment.id)
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        private const val TAG = "AssignmentListFragment"
     }
 }

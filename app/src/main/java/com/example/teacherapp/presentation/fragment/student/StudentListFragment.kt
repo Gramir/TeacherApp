@@ -1,5 +1,6 @@
 package com.example.teacherapp.presentation.fragment.student
 
+import StudentAdapter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,7 +13,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.teacherapp.databinding.FragmentStudentListBinding
-import com.example.teacherapp.presentation.adapter.StudentAdapter
 import com.example.teacherapp.presentation.viewmodel.student.StudentUiState
 import com.example.teacherapp.presentation.viewmodel.student.StudentViewModel
 import dagger.hilt.android.AndroidEntryPoint

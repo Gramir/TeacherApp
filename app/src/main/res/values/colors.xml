@@ -10,10 +10,32 @@
     <color name="light_gray">#EEEEEE</color>
 
     <!-- Colores para el tema oscuro -->
-    <color name="background_dark">#121212</color>
-    <color name="surface_dark">#1E1E1E</color>
+
     <color name="text_color_dark">#DEFFFFFF</color>
-    <color name="text_hint_dark">#80FFFFFF</color>
     <color name="input_background_dark">#2C2C2C</color>
     <color name="stroke_color_dark">#3DFFFFFF</color>
+
+    <!-- Paleta de colores moderna -->
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#FF4081</color>
+    <color name="accent_dark">#F50057</color>
+
+    <!-- Colores de fondo -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="card_background_dark">#2D2D2D</color>
+
+    <!-- Colores de texto -->
+    <color name="text_primary_dark">#DEFFFFFF</color>
+    <color name="text_secondary_dark">#99FFFFFF</color>
+    <color name="text_hint_dark">#61FFFFFF</color>
+
+    <!-- Estados -->
+    <color name="status_pending">#FFA000</color>
+    <color name="status_in_progress">#1976D2</color>
+    <color name="status_completed">#388E3C</color>
+
+    <!-- Otros -->
+    <color name="divider">#1FFFFFFF</color>
+    <color name="error">#CF6679</color>
 </resources>

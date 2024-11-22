@@ -1,6 +1,5 @@
 package com.example.teacherapp.presentation.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -24,7 +23,6 @@ class AttendanceAdapter(
 
     override fun onBindViewHolder(holder: AttendanceViewHolder, position: Int) {
         val item = getItem(position)
-        Log.d(TAG, "Binding item at position $position: $item")
         holder.bind(item)
     }
 
@@ -32,8 +30,10 @@ class AttendanceAdapter(
         private val binding: ItemAttendanceBinding,
         private val onAttendanceChanged: (String, Boolean) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
+
         fun bind(attendance: AttendanceWithStudent) {
             with(binding) {
+                initialsTextView.text = getInitials(attendance.studentName)
                 studentNameTextView.text = attendance.studentName
                 presentCheckBox.apply {
                     setOnCheckedChangeListener(null) // Evita llamadas recursivas
@@ -43,6 +43,13 @@ class AttendanceAdapter(
                     }
                 }
             }
+        }
+
+        private fun getInitials(fullName: String): String {
+            return fullName.split(" ")
+                .mapNotNull { it.firstOrNull()?.uppercase() }
+                .take(2)
+                .joinToString("")
         }
     }
 

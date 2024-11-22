@@ -1,12 +1,11 @@
-package com.example.teacherapp.presentation.adapter
-
+import androidx.recyclerview.widget.DiffUtil
+import com.example.teacherapp.R
+import com.example.teacherapp.domain.model.Student
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.teacherapp.databinding.ItemStudentBinding
-import com.example.teacherapp.domain.model.Student
 
 class StudentAdapter(
     private val onItemClick: ((Student) -> Unit)? = null
@@ -32,33 +31,45 @@ class StudentAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(student: Student) {
-            with(binding) {
-                studentNameTextView.text = buildString {
-                    append(student.name)
-                    append(" ")
-                    append(student.lastName)
-                }
+            binding.apply {
+                // Establecer las iniciales
+                initialsTextView.text = getInitials(student)
 
+                // Establecer el nombre completo
+                studentNameTextView.text = "${student.name} ${student.lastName}"
+
+                // Establecer fecha de nacimiento
                 studentBirthDateTextView.text = buildString {
-                    append("Birth Date: ")
+                    append(root.context.getString(R.string.student_birth_date))
+                    append(": ")
                     append(student.birthDate)
                 }
 
+                // Establecer teléfono
                 studentPhoneTextView.text = buildString {
-                    append("Phone: ")
+                    append(root.context.getString(R.string.student_phone))
+                    append(": ")
                     append(student.phone)
                 }
 
+                // Establecer email
                 studentEmailTextView.text = buildString {
-                    append("Email: ")
+                    append(root.context.getString(R.string.student_email))
+                    append(": ")
                     append(student.email)
                 }
 
-                // Card click listener
+                // Click listener en la tarjeta
                 root.setOnClickListener {
                     onItemClick?.invoke(student)
                 }
             }
+        }
+
+        private fun getInitials(student: Student): String {
+            val nameInitial = student.name.firstOrNull()?.uppercase() ?: ""
+            val lastNameInitial = student.lastName.firstOrNull()?.uppercase() ?: ""
+            return nameInitial + lastNameInitial
         }
     }
 
@@ -73,6 +84,6 @@ class StudentAdapter(
     }
 
     companion object {
-        //private const val TAG = "StudentAdapter"
+        private const val TAG = "StudentAdapter"
     }
 }

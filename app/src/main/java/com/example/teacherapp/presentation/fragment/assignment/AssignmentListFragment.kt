@@ -9,6 +9,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.teacherapp.R
 import com.example.teacherapp.databinding.FragmentAssignmentListBinding
 import com.example.teacherapp.domain.model.Assignment
@@ -31,7 +32,6 @@ class AssignmentListFragment : Fragment() {
     private val viewModel: AssignmentViewModel by viewModels()
     private lateinit var adapter: AssignmentAdapter
     private lateinit var courseId: String
-    private var currentDialog: DialogFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,11 +55,6 @@ class AssignmentListFragment : Fragment() {
         setupRecyclerView()
         setupViews()
         observeStates()
-        loadAssignments()
-    }
-
-    private fun loadAssignments() {
-        println("DEBUG_FRAGMENT: Cargando tareas para curso: $courseId")
         viewModel.getAssignments(courseId)
     }
 
@@ -73,6 +68,7 @@ class AssignmentListFragment : Fragment() {
                 showDeleteConfirmation(assignment)
             }
         )
+        binding.assignmentRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.assignmentRecyclerView.adapter = adapter
     }
 
@@ -84,33 +80,8 @@ class AssignmentListFragment : Fragment() {
 
     private fun showAddEditDialog(assignment: Assignment?) {
         println("DEBUG_FRAGMENT: Mostrando diálogo para tarea: $assignment")
-
-        try {
-            // Cerrar el diálogo actual si existe
-            currentDialog?.dismissAllowingStateLoss()
-            currentDialog = null
-
-            // Ejecutar las transacciones pendientes
-            childFragmentManager.executePendingTransactions()
-
-            // Crear y mostrar el nuevo diálogo
-            currentDialog = AddEditAssignmentDialog.newInstance(courseId, assignment).apply {
-                show(this@AssignmentListFragment.childFragmentManager, null)
-            }
-        } catch (e: Exception) {
-            println("DEBUG_FRAGMENT: Error al mostrar diálogo: ${e.message}")
-            // Intentar una segunda vez después de un pequeño retraso
-            view?.postDelayed({
-                try {
-                    currentDialog = AddEditAssignmentDialog.newInstance(courseId, assignment).apply {
-                        show(this@AssignmentListFragment.childFragmentManager, null)
-                    }
-                } catch (e: Exception) {
-                    println("DEBUG_FRAGMENT: Error en segundo intento: ${e.message}")
-                    Snackbar.make(binding.root, "Error al abrir el diálogo", Snackbar.LENGTH_SHORT).show()
-                }
-            }, 100)
-        }
+        AddEditAssignmentDialog.newInstance(courseId, assignment)
+            .show(childFragmentManager, "assignment_dialog")
     }
 
     private fun showDeleteConfirmation(assignment: Assignment) {
@@ -133,6 +104,7 @@ class AssignmentListFragment : Fragment() {
                     }
                     is AssignmentsState.Success -> {
                         binding.assignmentProgressBar.visibility = View.GONE
+                        println("DEBUG_FRAGMENT: Actualizando lista con ${state.assignments.size} tareas")
                         adapter.submitList(state.assignments)
                     }
                     is AssignmentsState.Error -> {
@@ -147,8 +119,7 @@ class AssignmentListFragment : Fragment() {
             viewModel.actionState.collect { state ->
                 when (state) {
                     is ActionState.Success -> {
-                        // Recargar la lista después de una acción exitosa
-                        loadAssignments()
+                        viewModel.getAssignments(courseId)
                         viewModel.resetActionState()
                     }
                     is ActionState.Error -> {
@@ -163,8 +134,6 @@ class AssignmentListFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        currentDialog?.dismissAllowingStateLoss()
-        currentDialog = null
         _binding = null
     }
 }

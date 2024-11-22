@@ -17,6 +17,7 @@
     <string name="date">Fecha</string>
     <string name="save_attendance">Guardar Asistencia</string>
     <string name="attendance_saved">Asistencia guardada exitosamente</string>
+    <string name="attendance_list">Lista de asistencia</string>
 
     <!-- Assignments -->
     <string name="add_assignment">Agregar Tarea</string>
@@ -31,6 +32,8 @@
     <string name="edit">Editar</string>
     <string name="assignment_saved">Tarea guardada exitosamente</string>
     <string name="assignment_deleted">Tarea eliminada exitosamente</string>
+    <string name="total_assignments">%d tareas en total</string>
+    <string name="no_assignments">No hay tareas asignadas</string>
 
     <!-- Status options for assignments -->
     <string-array name="assignment_status_options">

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -30,6 +31,7 @@ class AssignmentListFragment : Fragment() {
     private val viewModel: AssignmentViewModel by viewModels()
     private lateinit var adapter: AssignmentAdapter
     private lateinit var courseId: String
+    private var currentDialog: DialogFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,8 +84,33 @@ class AssignmentListFragment : Fragment() {
 
     private fun showAddEditDialog(assignment: Assignment?) {
         println("DEBUG_FRAGMENT: Mostrando diálogo para tarea: $assignment")
-        AddEditAssignmentDialog.newInstance(courseId, assignment)
-            .show(childFragmentManager, "assignment_dialog")
+
+        try {
+            // Cerrar el diálogo actual si existe
+            currentDialog?.dismissAllowingStateLoss()
+            currentDialog = null
+
+            // Ejecutar las transacciones pendientes
+            childFragmentManager.executePendingTransactions()
+
+            // Crear y mostrar el nuevo diálogo
+            currentDialog = AddEditAssignmentDialog.newInstance(courseId, assignment).apply {
+                show(this@AssignmentListFragment.childFragmentManager, null)
+            }
+        } catch (e: Exception) {
+            println("DEBUG_FRAGMENT: Error al mostrar diálogo: ${e.message}")
+            // Intentar una segunda vez después de un pequeño retraso
+            view?.postDelayed({
+                try {
+                    currentDialog = AddEditAssignmentDialog.newInstance(courseId, assignment).apply {
+                        show(this@AssignmentListFragment.childFragmentManager, null)
+                    }
+                } catch (e: Exception) {
+                    println("DEBUG_FRAGMENT: Error en segundo intento: ${e.message}")
+                    Snackbar.make(binding.root, "Error al abrir el diálogo", Snackbar.LENGTH_SHORT).show()
+                }
+            }, 100)
+        }
     }
 
     private fun showDeleteConfirmation(assignment: Assignment) {
@@ -136,10 +163,8 @@ class AssignmentListFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        currentDialog?.dismissAllowingStateLoss()
+        currentDialog = null
         _binding = null
-    }
-
-    companion object {
-        private const val TAG = "AssignmentListFragment"
     }
 }

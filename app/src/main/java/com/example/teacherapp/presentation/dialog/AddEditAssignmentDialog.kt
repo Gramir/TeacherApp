@@ -1,11 +1,13 @@
 package com.example.teacherapp.presentation.dialog
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.teacherapp.R
@@ -29,6 +31,7 @@ class AddEditAssignmentDialog : DialogFragment() {
     private val viewModel: AssignmentViewModel by activityViewModels()
     private lateinit var courseId: String
     private var assignment: Assignment? = null
+    private var isDialogShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +67,29 @@ class AddEditAssignmentDialog : DialogFragment() {
         observeActionState()
     }
 
+    override fun show(manager: FragmentManager, tag: String?) {
+        try {
+            if (!isDialogShown) {
+                val ft = manager.beginTransaction()
+                ft.add(this, tag)
+                ft.commitAllowingStateLoss()
+                isDialogShown = true
+            }
+        } catch (e: Exception) {
+            println("DEBUG_DIALOG: Error al mostrar diálogo: ${e.message}")
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        dialog?.window?.let { window ->
+            window.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+    }
+
     private fun observeActionState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.actionState.collect { state ->
@@ -71,7 +97,8 @@ class AddEditAssignmentDialog : DialogFragment() {
                     is ActionState.Success -> {
                         Snackbar.make(
                             binding.root,
-                            if (assignment == null) R.string.assignment_saved else R.string.assignment_updated,
+                            if (assignment == null) R.string.assignment_saved
+                            else R.string.assignment_updated,
                             Snackbar.LENGTH_SHORT
                         ).show()
                         dismiss()
@@ -183,6 +210,24 @@ class AddEditAssignmentDialog : DialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        isDialogShown = false
+        viewModel.clearSelectedAssignment()
+        viewModel.resetActionState()
+    }
+
+    override fun dismiss() {
+        if (isDialogShown) {
+            isDialogShown = false
+            try {
+                super.dismissAllowingStateLoss()
+            } catch (e: Exception) {
+                println("DEBUG_DIALOG: Error al cerrar diálogo: ${e.message}")
+            }
+        }
     }
 
     companion object {

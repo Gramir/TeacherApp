@@ -1,6 +1,6 @@
 # TeacherApp 📚
 
-Una aplicación Android moderna para profesores que facilita la gestión de cursos, asistencia y tareas. Desarrollada con Kotlin siguiendo la arquitectura Clean Architecture y patrones MVVM.
+Una aplicación Android moderna para profesores que facilita la gestión de cursos, asistencia y tareas. Desarrollada con Kotlin siguiendo la arquitectura Clean Architecture.
 
 ## Características 🌟
 
@@ -15,7 +15,6 @@ Una aplicación Android moderna para profesores que facilita la gestión de curs
 
 - **Kotlin**: Lenguaje principal de desarrollo
 - **Clean Architecture**: Arquitectura modular y escalable
-- **MVVM**: Patrón de diseño para la capa de presentación
 - **Dagger Hilt**: Inyección de dependencias
 - **Firebase**: 
   - Authentication: Gestión de usuarios

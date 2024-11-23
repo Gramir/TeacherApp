@@ -32,43 +32,49 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary_dark"
+                android:layout_marginBottom="8dp"
                 tools:text="Matemáticas Avanzadas"/>
 
             <TextView
                 android:id="@+id/course_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:textSize="14sp"
                 android:textColor="@color/primary"
+                android:layout_marginBottom="8dp"
                 tools:text="MAT-301"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
+                android:orientation="vertical">
 
+                <!-- Horario -->
                 <TextView
                     android:id="@+id/course_schedule"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:textColor="@color/text_secondary_dark"
                     android:drawableStart="@drawable/ic_time"
-                    android:drawablePadding="4dp"
-                    android:layout_marginEnd="16dp"
-                    tools:text="Lun-Mie 10:00-12:00"/>
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp"
+                    android:text="Horario: "
+                    tools:text="Horario: Lun-Mie 10:00-12:00"/>
 
+                <!-- Semestre -->
                 <TextView
                     android:id="@+id/course_semester"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:textColor="@color/text_secondary_dark"
                     android:drawableStart="@drawable/ic_calendar_small"
-                    android:drawablePadding="4dp"
-                    tools:text="2024-I"/>
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="Semestre: "
+                    tools:text="Semestre: 2024-I"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -79,41 +85,38 @@
             android:background="@color/divider"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Botones -->
+        <!-- Botones en vertical -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/assignments_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="@string/assignments"
                 android:textAllCaps="false"
-                android:layout_marginEnd="8dp"
                 app:icon="@drawable/ic_assignment"
                 app:iconGravity="textStart"
+                android:layout_marginBottom="8dp"
                 style="@style/Widget.App.Button.OutlinedButton"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/attendance_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="@string/attendance"
                 android:textAllCaps="false"
-                android:layout_marginEnd="8dp"
                 app:icon="@drawable/ic_attendance"
                 app:iconGravity="textStart"
+                android:layout_marginBottom="8dp"
                 style="@style/Widget.App.Button.OutlinedButton"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/students_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="@string/students"
                 android:textAllCaps="false"
                 app:icon="@drawable/ic_group"

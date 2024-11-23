@@ -1,6 +1,5 @@
 package com.example.teacherapp.presentation.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -35,11 +34,11 @@ class CourseAdapter(
         fun bind(course: Course) {
             binding.apply {
                 courseNameText.text = course.name
-                // Log: Ver el ID del curso cuando se bindea
-                Log.d("CourseAdapter", "Binding course con ID: ${course.id}")
-                assignmentsButton.setOnClickListener {  // Log: Ver el ID cuando se hace click
-                    Log.d("CourseAdapter", "Click en attendance para curso ID: ${course.id}")
-                    onAssignmentsClick(course.id) }
+                courseCode.text = course.code
+                courseSchedule.append(course.schedule)
+                courseSemester.append(course.semester)
+
+                assignmentsButton.setOnClickListener { onAssignmentsClick(course.id) }
                 attendanceButton.setOnClickListener { onAttendanceClick(course.id) }
                 studentsButton.setOnClickListener { onStudentsClick(course.id) }
             }

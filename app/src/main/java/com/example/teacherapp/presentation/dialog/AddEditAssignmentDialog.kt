@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
@@ -38,8 +37,6 @@ class AddEditAssignmentDialog : DialogFragment() {
         setStyle(STYLE_NORMAL, R.style.FullScreenDialog)
         courseId = arguments?.getString(ARG_COURSE_ID) ?: ""
         assignment = arguments?.getParcelable(ARG_ASSIGNMENT)
-        println("DEBUG_DIALOG: onCreate - courseId: $courseId")
-        println("DEBUG_DIALOG: assignment recibido: $assignment")
     }
 
     override fun onCreateView(
@@ -53,13 +50,10 @@ class AddEditAssignmentDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        println("DEBUG_DIALOG: onViewCreated iniciado")
         setupViews()
-        setupSpinner()
 
         // Si tenemos una tarea, llenar los campos directamente
         assignment?.let { assignment ->
-            println("DEBUG_DIALOG: Llenando campos con tarea: ${assignment.title}")
             updateFormFields(assignment)
         }
 
@@ -115,17 +109,10 @@ class AddEditAssignmentDialog : DialogFragment() {
     }
 
     private fun updateFormFields(assignment: Assignment) {
-        println("DEBUG_DIALOG: Actualizando campos del formulario")
-        println("DEBUG_DIALOG: Título: ${assignment.title}")
-        println("DEBUG_DIALOG: Descripción: ${assignment.description}")
-        println("DEBUG_DIALOG: Fecha: ${assignment.dueDate}")
-        println("DEBUG_DIALOG: Estado: ${assignment.status}")
-
         binding.apply {
             titleEditText.setText(assignment.title)
             descriptionEditText.setText(assignment.description)
             dueDateEditText.setText(assignment.dueDate)
-            statusAutoComplete.setText(assignment.status, false)
         }
     }
 
@@ -154,20 +141,11 @@ class AddEditAssignmentDialog : DialogFragment() {
         }
     }
 
-    private fun setupSpinner() {
-        val adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_dropdown_item_1line,
-            resources.getStringArray(R.array.assignment_status_options)
-        )
-        binding.statusAutoComplete.setAdapter(adapter)
-    }
-
     private fun saveAssignment() {
         val title = binding.titleEditText.text.toString()
         val description = binding.descriptionEditText.text.toString()
         val dueDate = binding.dueDateEditText.text.toString()
-        val status = binding.statusAutoComplete.text.toString()
+        val status = "Pendiente" // Estado por defecto para nuevas asignaciones
 
         if (title.isBlank() || dueDate.isBlank()) {
             if (title.isBlank())
@@ -183,7 +161,7 @@ class AddEditAssignmentDialog : DialogFragment() {
             description = description,
             dueDate = dueDate,
             courseId = courseId,
-            status = status,
+            status = if (assignment == null) status else assignment?.status ?: status,
             createdAt = assignment?.createdAt ?: System.currentTimeMillis()
         )
 
@@ -235,7 +213,6 @@ class AddEditAssignmentDialog : DialogFragment() {
         private const val ARG_ASSIGNMENT = "assignment"
 
         fun newInstance(courseId: String, assignment: Assignment? = null): AddEditAssignmentDialog {
-            println("DEBUG: Creando nuevo dialog - courseId: $courseId, assignment: $assignment")
             return AddEditAssignmentDialog().apply {
                 arguments = Bundle().apply {
                     putString(ARG_COURSE_ID, courseId)

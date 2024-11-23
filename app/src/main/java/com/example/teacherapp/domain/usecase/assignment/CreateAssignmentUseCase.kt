@@ -14,6 +14,9 @@ class CreateAssignmentUseCase @Inject constructor(
         if (assignment.dueDate.isBlank()) {
             return Result.failure(IllegalArgumentException("Due date cannot be empty"))
         }
-        return repository.addAssignment(assignment)
+
+        // Asegurar que el estado sea "Pendiente" para nuevas asignaciones
+        val newAssignment = assignment.copy(status = "Pendiente")
+        return repository.addAssignment(newAssignment)
     }
 }

@@ -16,6 +16,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TeacherApp">
 
+        <!-- Metadata para el canal de notificación por defecto -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
+
+        <!-- Ícono por defecto para notificaciones -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
+        <!-- Color por defecto para notificaciones -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/primary" />
+
         <!-- Actividad de inicio de sesión -->
         <activity
             android:name=".presentation.activity.LoginActivity"

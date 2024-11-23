@@ -3,6 +3,7 @@ package com.example.teacherapp
 import android.app.Application
 import android.content.Context
 import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.HiltAndroidApp
 import kotlin.system.exitProcess
 
@@ -14,6 +15,8 @@ class TeacherApplication : Application() {
             super.onCreate()
             // Inicializar Firebase
             FirebaseApp.initializeApp(this)
+            // Inicializar Analytics
+            FirebaseAnalytics.getInstance(this)
 
             // Limpiar caché de la aplicación al inicio
             clearAppCache()

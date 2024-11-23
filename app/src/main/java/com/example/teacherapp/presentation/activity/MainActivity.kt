@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var notificationService: NotificationService
+
     @Inject
     lateinit var sessionManager: SessionManager
 
@@ -43,23 +44,7 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            Toast.makeText(
-                this,
-                "Notifications enabled",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            FirebaseMessaging.getInstance().subscribeToTopic("assignments")
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Log.d("MainActivity", "Subscribed to assignments notifications")
-                    } else {
-                        Log.w("MainActivity", "Failed to subscribe to assignments notifications",
-                            task.exception)
-                    }
-                }
-
-            notificationService.createNotificationChannel()
+            handleNotificationPermissionGranted()
         } else {
             if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 showNotificationPermissionDialog()
@@ -77,6 +62,7 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -99,28 +85,60 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupFirebaseMessaging() {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("MainActivity", "Fetching FCM registration token failed", task.exception)
-                return@addOnCompleteListener
+        val teacherId = intent.getStringExtra("TEACHER_ID")
+        if (teacherId != null) {
+            // Suscribirse a notificaciones específicas para este profesor
+            FirebaseMessaging.getInstance().subscribeToTopic("teacher_$teacherId")
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "Subscribed to teacher notifications")
+                    } else {
+                        Log.w(TAG, "Failed to subscribe to teacher notifications", task.exception)
+                    }
+                }
+
+            // Obtener y registrar el token FCM
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token = task.result
+                    Log.d(TAG, "FCM Token: $token")
+                } else {
+                    Log.w(TAG, "Failed to get FCM token", task.exception)
+                }
             }
-            val token = task.result
-            Log.d("MainActivity", "FCM Token: $token")
+        } else {
+            Log.e(TAG, "Teacher ID is null")
         }
+    }
+
+    private fun handleNotificationPermissionGranted() {
+        Toast.makeText(this, "Notificaciones activadas", Toast.LENGTH_SHORT).show()
+        val teacherId = intent.getStringExtra("TEACHER_ID")
+        if (teacherId != null) {
+            FirebaseMessaging.getInstance().subscribeToTopic("teacher_$teacherId")
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "Successfully subscribed to notifications")
+                    } else {
+                        Log.w(TAG, "Failed to subscribe to notifications", task.exception)
+                    }
+                }
+        }
+        notificationService.createNotificationChannel()
     }
 
     private fun showNotificationPermissionDialog() {
         MaterialAlertDialogBuilder(this)
-            .setTitle("Notifications Permission")
-            .setMessage("We need notification permission to alert you about new assignments. Would you like to enable notifications?")
-            .setPositiveButton("Yes") { _, _ ->
+            .setTitle(R.string.notification_permission_title)
+            .setMessage(R.string.notification_permission_message)
+            .setPositiveButton(R.string.yes) { _, _ ->
                 askNotificationPermission()
             }
-            .setNegativeButton("No") { dialog, _ ->
+            .setNegativeButton(R.string.no) { dialog, _ ->
                 dialog.dismiss()
                 Toast.makeText(
                     this,
-                    "You won't receive notifications about new assignments",
+                    R.string.notifications_disabled_message,
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -129,16 +147,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun showNotificationSettingsDialog() {
         MaterialAlertDialogBuilder(this)
-            .setTitle("Enable Notifications")
-            .setMessage("To receive notifications about new assignments, please enable notifications in settings")
-            .setPositiveButton("Settings") { _, _ ->
+            .setTitle(R.string.enable_notifications)
+            .setMessage(R.string.enable_notifications_settings_message)
+            .setPositiveButton(R.string.settings) { _, _ ->
                 openNotificationSettings()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
                 dialog.dismiss()
                 Toast.makeText(
                     this,
-                    "You won't receive notifications about new assignments",
+                    R.string.notifications_disabled_message,
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -146,16 +164,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openNotificationSettings() {
-        val intent = Intent().apply {
-            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            data = Uri.fromParts("package", packageName, null)
-        }
         try {
+            val intent = Intent().apply {
+                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                data = Uri.fromParts("package", packageName, null)
+            }
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 this,
-                "Unable to open settings",
+                R.string.unable_to_open_settings,
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -168,16 +186,20 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                FirebaseMessaging.getInstance().subscribeToTopic("assignments")
+                handleNotificationPermissionGranted()
             } else {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
-            FirebaseMessaging.getInstance().subscribeToTopic("assignments")
+            handleNotificationPermissionGranted()
         }
     }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }

@@ -2,7 +2,7 @@ package com.example.teacherapp.data.service
 
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.example.teacherapp.domain.model.Assignment
+import com.example.teacherapp.domain.model.Course
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -16,24 +16,24 @@ class TeacherAppMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
 
         remoteMessage.data.let { data ->
-            // Only process notification if it's a new assignment
-            if (data["type"] == "new_assignment") {
-                val assignment = Assignment(
+            // Solo procesar notificación si es un nuevo curso
+            if (data["type"] == "new_course") {
+                val course = Course(
                     id = data["id"] ?: "",
-                    title = data["title"] ?: "",
-                    description = data["description"] ?: "",
-                    dueDate = data["dueDate"] ?: "",
-                    courseId = data["courseId"] ?: "",
-                    status = data["status"] ?: "pending"
+                    name = data["name"] ?: "",
+                    teacherId = data["teacherId"] ?: "",
+                    code = data["code"] ?: "",
+                    semester = data["semester"] ?: "",
+                    schedule = data["schedule"] ?: ""
                 )
 
-                notificationService.showNewAssignmentNotification(assignment)
+                notificationService.showNewCourseNotification(course)
             }
         }
     }
 
     override fun onNewToken(token: String) {
-        // Here you would typically send this token to your server
-        // This is required for sending notifications to specific devices
+        // Aquí enviarías el token al servidor para actualizarlo
+        // Esto es necesario para enviar notificaciones a dispositivos específicos
     }
 }

@@ -75,10 +75,13 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.messaging.ktx)
     implementation (libs.firebase.auth.ktx)
+    implementation (libs.firebase.analytics)
+
 
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.material)
+    implementation(libs.firebase.messaging)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

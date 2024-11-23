@@ -69,4 +69,20 @@
     <string name="confirm_delete_title">Confirmar eliminación</string>
     <string name="confirm_delete_message">¿Está seguro que desea eliminar esta tarea?</string>
     <string name="due_date_format">Fecha de entrega: %1$s</string>
+
+    <!-- Notification Permissions -->
+    <string name="notification_permission_title">Permisos de Notificación</string>
+    <string name="notification_permission_message">Necesitamos permiso para enviarle notificaciones sobre sus nuevos cursos. ¿Desea habilitar las notificaciones?</string>
+    <string name="notifications_disabled_message">No recibirá notificaciones sobre nuevos cursos</string>
+    <string name="enable_notifications">Habilitar Notificaciones</string>
+    <string name="enable_notifications_settings_message">Para recibir notificaciones sobre nuevos cursos, por favor habilite las notificaciones en configuración</string>
+    <string name="settings">Configuración</string>
+    <string name="unable_to_open_settings">No se pudo abrir la configuración</string>
+
+    <!-- Course Notifications -->
+    <string name="new_course_notification_title">Nuevo Curso Asignado</string>
+    <string name="new_course_notification_text">Se le ha asignado un nuevo curso: %1$s</string>
+    <string name="default_notification_channel_id">teacher_app_default_channel</string>
+    <string name="default_notification_channel_name">Notificaciones Generales</string>
+    <string name="default_notification_channel_description">Notificaciones de cursos</string>
 </resources>
